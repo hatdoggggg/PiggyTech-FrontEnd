@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
       nextScreen: const RoleSelectionScreen(), // Change this to your actual next screen widget
       splashIconSize: 300,
-      backgroundColor: const Color.fromARGB(255, 107, 159, 248),
+      backgroundColor: Colors.yellow,
       duration: 6000, // Duration in milliseconds (3000ms = 3 seconds)
       splashTransition: SplashTransition.fadeTransition, // Optional: specify a transition effect
     );
