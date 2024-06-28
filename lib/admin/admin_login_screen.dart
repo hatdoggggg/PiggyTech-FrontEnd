@@ -39,8 +39,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.yellowAccent[400],
+        backgroundColor: Colors.yellow,
         appBar: AppBar(
+          backgroundColor: Colors.yellow,
             title: const Text(
               'PiggyTech',
               style: TextStyle(
