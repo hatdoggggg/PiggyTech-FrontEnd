@@ -32,6 +32,19 @@ class AdminDrawerList extends StatefulWidget {
 class _AdminDrawerListState extends State<AdminDrawerList> {
   var currentPage = DrawerSections.dashboard;
 
+  // Map to store titles for each section
+  final Map<DrawerSections, String> sectionTitles = {
+    DrawerSections.dashboard: "Dashboard",
+    DrawerSections.category: "Category",
+    DrawerSections.product: "Product",
+    DrawerSections.inventory: "Inventory",
+    DrawerSections.sales: "Sales",
+    DrawerSections.reports: "Reports",
+    DrawerSections.users: "Users",
+    DrawerSections.profile: "Profile",
+    DrawerSections.logout: "Logout",
+  };
+
   @override
   Widget build(BuildContext context) {
     Widget container;
@@ -69,7 +82,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
         title: Text(
-          "PiggyTech",
+          sectionTitles[currentPage] ?? "PiggyTech", // Default to "PiggyTech" if not found
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -247,3 +260,4 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     );
   }
 }
+
