@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '/admin/admin_home_screen.dart';
-import '/sales/sales_home_screen.dart';
+import 'admin/admin_drawer_list.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,12 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (isLogin) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AdminHomeScreen()),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SalesHomeScreen()),
+          MaterialPageRoute(builder: (context) => AdminDrawerList()),
         );
       }
     });
