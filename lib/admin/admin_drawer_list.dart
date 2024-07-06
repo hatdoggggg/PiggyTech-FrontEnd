@@ -80,7 +80,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.yellow,
         title: Text(
           sectionTitles[currentPage] ?? "PiggyTech", // Default to "PiggyTech" if not found
           style: TextStyle(

@@ -11,104 +11,71 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.limeAccent,
+      backgroundColor: Colors.white70,
       body: Padding(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Center(
-                  child: CircleAvatar(
+            Center(
+              child: Column(
+                children: <Widget>[
+                  const CircleAvatar(
                     backgroundImage: AssetImage('assets/images/user.png'),
                     radius: 50.0,
                   ),
-                ),
-                Divider(height: 55.0,
-                  color: Colors.black,
-                  thickness: 3.0,
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person_2,
-                      color: Colors.black,
-                    ),
-                    SizedBox(width: 3.0,),
-                    Text(
-                      'NAME',
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      'Edit profile image',
                       style: TextStyle(
-                        fontSize:25.0,
-                        color: Colors.black,
-                        letterSpacing: 2.0,
+                        color: Colors.blue,
                       ),
                     ),
-                  ],
-                ),
-                Text(
-                  'Vhenus M. Tumbaga',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontSize: 25.0,
                   ),
-                ),
-                SizedBox(height: 30.0,),
-                Row(
-                    children:[
-                      Icon(
-                        Icons.calendar_month_sharp,
-                        color:Colors.black,
-                      ),
-                      SizedBox(width: 3.0,),
-                      Text(
-                        'YEAR',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 25.0,
-                        ),
-                      ),
-                    ]
-                ),
-                Text(
-                  'Year',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontSize: 25.0,
-                  ),
-                ),
-                SizedBox(height: 30.0,),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.email_sharp,
-                      color: Colors.black,
-                    ),
-                    SizedBox(width: 3.0,),
-                    Text(
-                      'EMAIL',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 25.0
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  'jvrclclothing@gmail.com',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontSize: 25.0
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.person, 'Name', 'Vhenus Tumbaga'),
+            buildProfileItem(Icons.location_city, 'Address', 'Calaca City'),
+            buildProfileItem(Icons.phone, 'Phone No', '0123456789'),
+            buildProfileItem(Icons.email, 'Email', 'vt@gmail.com'),
+            buildProfileItem(Icons.lock, 'Password', 'password123'),
+            buildProfileItem(Icons.date_range, 'Created On', '2024-01-01'),
           ],
         ),
-        ),
-      );
+      ),
+    );
+  }
+
+  Widget buildProfileItem(IconData icon, String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        children: <Widget>[
+          Icon(icon, color: Colors.black),
+          const SizedBox(width: 10.0),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18.0,
+              color: Colors.black54,
+            ),
+          ),
+          const SizedBox(width: 10.0),
+          Icon(Icons.more_vert, color: Colors.black),
+        ],
+      ),
+    );
   }
 }
