@@ -1,0 +1,206 @@
+import 'package:flutter/material.dart';
+
+import 'sales_sidebar/sales_dashboard.dart';
+import 'sales_sidebar/sales_pos.dart';
+import 'sales_sidebar/sales_profile.dart';
+import 'sales_drawer_header.dart';
+
+import '/login_screen.dart';
+
+enum DrawerSections {
+  dashboard,
+  pos,
+  profile,
+  logout,
+}
+
+class SalesDrawerList extends StatefulWidget {
+  @override
+  _SalesDrawerListState createState() => _SalesDrawerListState();
+}
+
+class _SalesDrawerListState extends State<SalesDrawerList> {
+  var currentPage = DrawerSections.dashboard;
+
+  // Map to store titles for each section
+  final Map<DrawerSections, String> sectionTitles = {
+    DrawerSections.dashboard: "Dashboard",
+    DrawerSections.pos: "POS",
+    DrawerSections.profile: "Profile",
+    DrawerSections.logout: "Logout",
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    Widget container;
+    switch (currentPage) {
+      case DrawerSections.dashboard:
+        container = SalesDashboardPage();
+        break;
+      case DrawerSections.pos:
+        container = SalesPosPage();
+        break;
+      case DrawerSections.profile:
+        container = SalesProfilePage();
+        break;
+      case DrawerSections.logout:
+        container = LoginScreen();
+        break;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue[700],
+        title: Text(
+          sectionTitles[currentPage] ?? "PiggyTech", // Default to "PiggyTech" if not found
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: container,
+      drawer: Drawer(
+        child: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height, // Ensure full screen height
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    SalesDrawerHeader(),
+                    MyDrawerList(),
+                  ],
+                ),
+                Footer(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget MyDrawerList() {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 15,
+      ),
+      child: Column(
+        children: [
+          menuItem(1, "Dashboard", Icons.dashboard_outlined,
+              currentPage == DrawerSections.dashboard),
+          Divider(),
+          menuItem(2, "POS", Icons.countertops_outlined,
+              currentPage == DrawerSections.pos),
+          Divider(),
+          menuItem(3, "Profile", Icons.perm_identity_outlined,
+              currentPage == DrawerSections.profile),
+          Divider(),
+          menuItem(4, "Logout", Icons.logout,
+              currentPage == DrawerSections.logout),
+        ],
+      ),
+    );
+  }
+
+  Widget menuItem(int id, String title, IconData icon, bool selected) {
+    return Material(
+      color: selected ? Colors.grey[300] : Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+          if (id == 4) {
+            _showLogoutDialog();
+          } else {
+            setState(() {
+              switch (id) {
+                case 1:
+                  currentPage = DrawerSections.dashboard;
+                  break;
+                case 2:
+                  currentPage = DrawerSections.pos;
+                  break;
+                case 3:
+                  currentPage = DrawerSections.profile;
+                  break;
+              }
+            });
+          }
+        },
+        child: Padding(
+          padding: EdgeInsets.all(15.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: Colors.black,
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text("Are you sure you want to logout?"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
+            },
+            child: Text("Log Out"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget Footer() {
+    return Container(
+      padding: EdgeInsets.all(15.0),
+      color: Colors.grey,
+      height: 60,
+      width: double.infinity,
+      child: Text(
+        "Cashier",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+    );
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:piggytech/sales/sales_sidebar/sales_dashboard.dart';
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({super.key});
@@ -36,46 +37,88 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 20.0),
-            buildProfileItem(Icons.person, 'Name', 'Vhenus Tumbaga'),
-            buildProfileItem(Icons.location_city, 'Address', 'Calaca City'),
-            buildProfileItem(Icons.phone, 'Phone No', '0123456789'),
-            buildProfileItem(Icons.email, 'Email', 'vt@gmail.com'),
-            buildProfileItem(Icons.lock, 'Password', 'password123'),
-            buildProfileItem(Icons.date_range, 'Created On', '2024-01-01'),
+            Divider(
+              height: 20.0,
+              color: Colors.black,
+              thickness: 2.0,
+            ),
+            Text(
+              'Profile Information',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              ),
+            ),
+            buildProfileItem(Icons.person, 'Name', 'Vhenus Tumbaga', () {
+              // Add your onPressed functionality here
+              print('Edit Name pressed');
+            }),
+            Divider(
+              height: 20.0,
+              color: Colors.black,
+              thickness: 2.0,
+            ),
+            Text(
+              'Personal Information',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18.0,
+              ),
+            ),
+            buildProfileItem(Icons.location_city, 'Address', 'Calaca City', () {
+              // Add your onPressed functionality here
+              print('Edit Address pressed');
+            }),
+            buildProfileItem(Icons.phone, 'Phone No', '0123456789', () {
+              // Add your onPressed functionality here
+              print('Edit Phone No pressed');
+            }),
+            buildProfileItem(Icons.email, 'Email', 'vt@gmail.com', () {
+              // Add your onPressed functionality here
+              print('Edit Email pressed');
+            }),
+            buildProfileItem(Icons.lock, 'Password', 'password123', () {
+              // Add your onPressed functionality here
+              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SalesDashboardPage()),);
+              print('Edit Password pressed');
+            }),
+            buildProfileItem(Icons.date_range, 'Created On', '2024-01-01', () {
+              // Add your onPressed functionality here
+              print('Edit Created On pressed');
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget buildProfileItem(IconData icon, String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        children: <Widget>[
-          Icon(icon, color: Colors.black),
-          const SizedBox(width: 10.0),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+  Widget buildProfileItem(IconData icon, String title, String value, VoidCallback onPressed) {
+    return Row(
+      children: <Widget>[
+        Icon(icon, color: Colors.black),
+        const SizedBox(width: 10.0),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18.0,
-              color: Colors.black54,
-            ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18.0,
+            color: Colors.black54,
           ),
-          const SizedBox(width: 10.0),
-          Icon(Icons.more_vert, color: Colors.black),
-        ],
-      ),
+        ),
+        const SizedBox(width: 5.0),
+        IconButton(
+          onPressed: onPressed,
+          icon: Icon(Icons.navigate_next),
+        ),
+      ],
     );
   }
 }
