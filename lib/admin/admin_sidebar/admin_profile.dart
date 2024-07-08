@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:piggytech/sales/sales_sidebar/sales_dashboard.dart';
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({super.key});
@@ -22,17 +21,19 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               child: Column(
                 children: <Widget>[
                   const CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/user.png'),
+                    backgroundImage: AssetImage('assets/images/profile.jpg'),
                     radius: 50.0,
                   ),
                   TextButton(
-                    onPressed: () {},
                     child: const Text(
                       'Edit profile image',
                       style: TextStyle(
                         color: Colors.blue,
                       ),
                     ),
+                    onPressed: () {
+                      print('Photo');
+                    },
                   ),
                 ],
               ),
