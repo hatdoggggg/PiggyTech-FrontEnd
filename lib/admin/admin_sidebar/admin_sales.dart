@@ -11,9 +11,9 @@ class _AdminSalesPageState extends State<AdminSalesPage> {
   TextEditingController _searchController = TextEditingController();
 
   final List<Map<String, String>> _products = [
-    {"ID Receipt": "1", "Total": "May 01, 2024", "Date": "06-19-24"},
-    {"ID Receipt": "2", "Total": "May 01, 2024", "Date": "07-26-24"},
-    {"ID Receipt": "3", "Total": "May 01, 2024", "Date": "10-21-24"},
+    {"ID Receipt": "1", "Total": "100", "Date": "06-19-24"},
+    {"ID Receipt": "2", "Total": "150", "Date": "07-26-24"},
+    {"ID Receipt": "3", "Total": "200", "Date": "10-21-24"},
   ];
 
   @override
@@ -24,10 +24,15 @@ class _AdminSalesPageState extends State<AdminSalesPage> {
         child: Column(
           children: [
             _buildSearchBarWithFunnel(),
-            SizedBox(height: 5.0), // Space between search bar and table
+            SizedBox(height: 5.0),
             _buildProductTable(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewSale,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.yellow,
       ),
     );
   }
@@ -40,11 +45,11 @@ class _AdminSalesPageState extends State<AdminSalesPage> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search...',
-              prefixIcon: Icon(Icons.search), // Add the search icon
+              prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
-                  color: Colors.blue,
+                  color: Colors.yellow,
                 ),
               ),
               filled: true,
@@ -56,12 +61,12 @@ class _AdminSalesPageState extends State<AdminSalesPage> {
             },
           ),
         ),
-        SizedBox(width: 10.0), // Add some space between the search bar and the icon
+        SizedBox(width: 10.0),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),
             color: Colors.grey[200],
-            border: Border.all(color: Colors.blue),
+            border: Border.all(color: Colors.yellow),
           ),
           child: IconButton(
             icon: Icon(Icons.filter_list),
@@ -76,7 +81,6 @@ class _AdminSalesPageState extends State<AdminSalesPage> {
   }
 
   Widget _buildProductTable() {
-
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -113,6 +117,11 @@ class _AdminSalesPageState extends State<AdminSalesPage> {
         ),
       ),
     );
+  }
+
+  void _addNewSale() {
+    // Handle adding a new sale here
+    print('Add icon pressed');
   }
 
   @override

@@ -29,6 +29,11 @@ class _AdminProductPageState extends State<AdminProductPage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewProduct,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.yellow,
+      ),
     );
   }
 
@@ -56,12 +61,12 @@ class _AdminProductPageState extends State<AdminProductPage> {
             },
           ),
         ),
-        SizedBox(width: 10.0), // Add some space between the search bar and the icon
+        SizedBox(width: 10.0),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),
             color: Colors.grey[200],
-            border: Border.all(color: Colors.blue),
+            border: Border.all(color: Colors.yellow),
           ),
           child: IconButton(
             icon: Icon(Icons.filter_list),
@@ -112,6 +117,11 @@ class _AdminProductPageState extends State<AdminProductPage> {
         ),
       ),
     );
+  }
+
+  void _addNewProduct() {
+    // Handle adding a new product here
+    print('Add icon pressed');
   }
 
   @override

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'sales_sidebar/sales_dashboard.dart';
-import 'sales_sidebar/sales_pos.dart';
+import 'sales_sidebar/history.dart';
 import 'sales_sidebar/sales_profile.dart';
 import 'sales_drawer_header.dart';
 
@@ -9,7 +9,7 @@ import '/login_screen.dart';
 
 enum DrawerSections {
   dashboard,
-  pos,
+  history,
   profile,
   logout,
 }
@@ -25,7 +25,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
   // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
-    DrawerSections.pos: "POS",
+    DrawerSections.history: "History",
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
   };
@@ -37,8 +37,8 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
       case DrawerSections.dashboard:
         container = SalesDashboardPage();
         break;
-      case DrawerSections.pos:
-        container = SalesPosPage();
+      case DrawerSections.history:
+        container = HistoryPage();
         break;
       case DrawerSections.profile:
         container = SalesProfilePage();
@@ -50,7 +50,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.yellow,
         title: Text(
           sectionTitles[currentPage] ?? "PiggyTech", // Default to "PiggyTech" if not found
           style: TextStyle(
@@ -91,8 +91,8 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
           menuItem(1, "Dashboard", Icons.dashboard_outlined,
               currentPage == DrawerSections.dashboard),
           Divider(),
-          menuItem(2, "POS", Icons.countertops_outlined,
-              currentPage == DrawerSections.pos),
+          menuItem(2, "History", Icons.countertops_outlined,
+              currentPage == DrawerSections.history),
           Divider(),
           menuItem(3, "Profile", Icons.perm_identity_outlined,
               currentPage == DrawerSections.profile),
@@ -119,7 +119,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
                   currentPage = DrawerSections.dashboard;
                   break;
                 case 2:
-                  currentPage = DrawerSections.pos;
+                  currentPage = DrawerSections.history;
                   break;
                 case 3:
                   currentPage = DrawerSections.profile;

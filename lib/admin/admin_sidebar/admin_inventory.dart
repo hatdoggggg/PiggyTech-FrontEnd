@@ -24,10 +24,15 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
         child: Column(
           children: [
             _buildSearchBarWithFunnel(),
-            SizedBox(height: 20.0), // Space between search bar and table
+            SizedBox(height: 20.0),
             _buildProductTable(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewProduct,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.yellow,
       ),
     );
   }
@@ -44,7 +49,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
-                  color: Colors.blue,
+                  color: Colors.yellow,
                 ),
               ),
               filled: true,
@@ -56,12 +61,12 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
             },
           ),
         ),
-        SizedBox(width: 10.0), // Add some space between the search bar and the icon
+        SizedBox(width: 10.0),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),
             color: Colors.grey[200],
-            border: Border.all(color: Colors.blue),
+            border: Border.all(color: Colors.yellow),
           ),
           child: IconButton(
             icon: Icon(Icons.filter_list),
@@ -112,6 +117,11 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
         ),
       ),
     );
+  }
+
+  void _addNewProduct() {
+    // Handle adding a new product here
+    print('Add icon pressed');
   }
 
   @override

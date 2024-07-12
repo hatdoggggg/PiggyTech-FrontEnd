@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'admin_sidebar/admin_dashboard.dart';
-import 'admin_sidebar/admin_category.dart';
 import 'admin_sidebar/admin_product.dart';
 import 'admin_sidebar/admin_inventory.dart';
 import 'admin_sidebar/admin_sales.dart';
@@ -14,7 +13,6 @@ import '/login_screen.dart';
 
 enum DrawerSections {
   dashboard,
-  category,
   product,
   inventory,
   sales,
@@ -35,7 +33,6 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
   // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
-    DrawerSections.category: "Category",
     DrawerSections.product: "Product",
     DrawerSections.inventory: "Inventory",
     DrawerSections.sales: "Sales",
@@ -51,9 +48,6 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     switch (currentPage) {
       case DrawerSections.dashboard:
         container = AdminDashboardPage();
-        break;
-      case DrawerSections.category:
-        container = AdminCategoryPage();
         break;
       case DrawerSections.product:
         container = AdminProductPage();
@@ -121,24 +115,22 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           menuItem(1, "Dashboard", Icons.dashboard_outlined,
               currentPage == DrawerSections.dashboard),
           Divider(),
-          menuItem(2, "Category", Icons.category_outlined,
-              currentPage == DrawerSections.category),
-          menuItem(3, "Product", Icons.shopping_cart_outlined,
+          menuItem(2, "Product", Icons.shopping_cart_outlined,
               currentPage == DrawerSections.product),
-          menuItem(4, "Inventory", Icons.inventory_outlined,
+          menuItem(3, "Inventory", Icons.inventory_outlined,
               currentPage == DrawerSections.inventory),
           Divider(),
-          menuItem(5, "Sales", Icons.monetization_on_outlined,
+          menuItem(4, "Sales", Icons.monetization_on_outlined,
               currentPage == DrawerSections.sales),
-          menuItem(6, "Reports", Icons.report_outlined,
+          menuItem(5, "Reports", Icons.report_outlined,
               currentPage == DrawerSections.reports),
           Divider(),
-          menuItem(7, "Users", Icons.people_alt_outlined,
+          menuItem(6, "Users", Icons.people_alt_outlined,
               currentPage == DrawerSections.users),
-          menuItem(8, "Profile", Icons.perm_identity_outlined,
+          menuItem(7, "Profile", Icons.perm_identity_outlined,
               currentPage == DrawerSections.profile),
           Divider(),
-          menuItem(9, "Logout", Icons.logout,
+          menuItem(8, "Logout", Icons.logout,
               currentPage == DrawerSections.logout),
         ],
       ),
@@ -151,7 +143,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
       child: InkWell(
         onTap: () {
           Navigator.pop(context);
-          if (id == 9) {
+          if (id == 8) {
             _showLogoutDialog();
           } else {
             setState(() {
@@ -160,24 +152,21 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
                   currentPage = DrawerSections.dashboard;
                   break;
                 case 2:
-                  currentPage = DrawerSections.category;
-                  break;
-                case 3:
                   currentPage = DrawerSections.product;
                   break;
-                case 4:
+                case 3:
                   currentPage = DrawerSections.inventory;
                   break;
-                case 5:
+                case 4:
                   currentPage = DrawerSections.sales;
                   break;
-                case 6:
+                case 5:
                   currentPage = DrawerSections.reports;
                   break;
-                case 7:
+                case 6:
                   currentPage = DrawerSections.users;
                   break;
-                case 8:
+                case 7:
                   currentPage = DrawerSections.profile;
                   break;
               }

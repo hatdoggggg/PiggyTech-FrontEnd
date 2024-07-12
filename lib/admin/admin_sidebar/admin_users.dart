@@ -24,10 +24,15 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         child: Column(
           children: [
             _buildSearchBarWithFunnel(),
-            SizedBox(height: 5.0), // Space between search bar and table
+            SizedBox(height: 5.0),
             _buildUserTable(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewUser,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.yellow,
       ),
     );
   }
@@ -40,11 +45,11 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search...',
-              prefixIcon: Icon(Icons.search), // Add the search icon
+              prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
-                  color: Colors.blue,
+                  color: Colors.yellow,
                 ),
               ),
               filled: true,
@@ -56,12 +61,12 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             },
           ),
         ),
-        SizedBox(width: 10.0), // Add some space between the search bar and the icon
+        SizedBox(width: 10.0),
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),
             color: Colors.grey[200],
-            border: Border.all(color: Colors.blue),
+            border: Border.all(color: Colors.yellow),
           ),
           child: IconButton(
             icon: Icon(Icons.filter_list),
@@ -114,9 +119,14 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
+  void _addNewUser() {
+    // Handle adding a new user here
+    print('Add icon pressed');
+  }
+
   @override
   void dispose() {
-    _searchController.dispose(); // Dispose of the controller when the widget is disposed
+    _searchController.dispose();
     super.dispose();
   }
 }
