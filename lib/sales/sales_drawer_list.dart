@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:piggytech/sales/sales_sidebar/pos.dart';
 
 import 'sales_sidebar/sales_dashboard.dart';
 import 'sales_sidebar/history.dart';
@@ -9,6 +10,7 @@ import '/login_screen.dart';
 
 enum DrawerSections {
   dashboard,
+  pos,
   history,
   profile,
   logout,
@@ -25,6 +27,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
   // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
+    DrawerSections.pos: "Pos",
     DrawerSections.history: "History",
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
@@ -36,6 +39,9 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
     switch (currentPage) {
       case DrawerSections.dashboard:
         container = SalesDashboardPage();
+        break;
+      case DrawerSections.pos:
+        container = PosPage();
         break;
       case DrawerSections.history:
         container = HistoryPage();
@@ -91,13 +97,16 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
           menuItem(1, "Dashboard", Icons.dashboard_outlined,
               currentPage == DrawerSections.dashboard),
           Divider(),
-          menuItem(2, "History", Icons.countertops_outlined,
+          menuItem(2, "Pos", Icons.countertops_outlined,
+              currentPage == DrawerSections.pos),
+          Divider(),
+          menuItem(3, "History", Icons.countertops_outlined,
               currentPage == DrawerSections.history),
           Divider(),
-          menuItem(3, "Profile", Icons.perm_identity_outlined,
+          menuItem(4, "Profile", Icons.perm_identity_outlined,
               currentPage == DrawerSections.profile),
           Divider(),
-          menuItem(4, "Logout", Icons.logout,
+          menuItem(5, "Logout", Icons.logout,
               currentPage == DrawerSections.logout),
         ],
       ),
@@ -119,9 +128,12 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
                   currentPage = DrawerSections.dashboard;
                   break;
                 case 2:
-                  currentPage = DrawerSections.history;
+                  currentPage = DrawerSections.pos;
                   break;
                 case 3:
+                  currentPage = DrawerSections.history;
+                  break;
+                case 4:
                   currentPage = DrawerSections.profile;
                   break;
               }

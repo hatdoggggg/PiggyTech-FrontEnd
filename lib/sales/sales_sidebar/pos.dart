@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+class PosPage extends StatefulWidget {
+  const PosPage({super.key});
 
   @override
-  _HistoryPageState createState() => _HistoryPageState();
+  State<PosPage> createState() => _PosPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> {
+class _PosPageState extends State<PosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text("Transactions",
+        child: Text("pos page",
           style: TextStyle(fontSize: 24.0),
         ),
       ),
