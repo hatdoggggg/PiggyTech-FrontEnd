@@ -119,7 +119,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
       child: InkWell(
         onTap: () {
           Navigator.pop(context);
-          if (id == 4) {
+          if (id == 5) {
             _showLogoutDialog();
           } else {
             setState(() {
