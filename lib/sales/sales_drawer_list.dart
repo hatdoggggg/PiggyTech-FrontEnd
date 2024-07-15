@@ -1,43 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:piggytech/sales/sales_sidebar/pos.dart';
 
-import 'admin_sidebar/admin_dashboard.dart';
-import 'admin_sidebar/admin_product.dart';
-import 'admin_sidebar/admin_inventory.dart';
-import 'admin_sidebar/admin_sales.dart';
-import 'admin_sidebar/admin_reports.dart';
-import 'admin_sidebar/admin_users.dart';
-import 'admin_sidebar/admin_profile.dart';
-import 'admin_drawer_header.dart';
+import 'sales_sidebar/sales_dashboard.dart';
+import 'sales_sidebar/history.dart';
+import 'sales_sidebar/sales_profile.dart';
+import 'sales_drawer_header.dart';
 
 import '/login_screen.dart';
 
 enum DrawerSections {
   dashboard,
-  product,
-  inventory,
-  sales,
-  reports,
-  users,
+  pos,
+  history,
   profile,
   logout,
 }
 
-class AdminDrawerList extends StatefulWidget {
+class SalesDrawerList extends StatefulWidget {
   @override
-  _AdminDrawerListState createState() => _AdminDrawerListState();
+  _SalesDrawerListState createState() => _SalesDrawerListState();
 }
 
-class _AdminDrawerListState extends State<AdminDrawerList> {
+class _SalesDrawerListState extends State<SalesDrawerList> {
   var currentPage = DrawerSections.dashboard;
 
   // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
-    DrawerSections.product: "Product",
-    DrawerSections.inventory: "Inventory",
-    DrawerSections.sales: "Sales",
-    DrawerSections.reports: "Reports",
-    DrawerSections.users: "Users",
+    DrawerSections.pos: "Pos",
+    DrawerSections.history: "History",
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
   };
@@ -47,25 +38,16 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     Widget container;
     switch (currentPage) {
       case DrawerSections.dashboard:
-        container = AdminDashboardPage();
+        container = SalesDashboardPage();
         break;
-      case DrawerSections.product:
-        container = AdminProductPage();
+      case DrawerSections.pos:
+        container = PosPage();
         break;
-      case DrawerSections.inventory:
-        container = AdminInventoryPage();
-        break;
-      case DrawerSections.sales:
-        container = AdminSalesPage();
-        break;
-      case DrawerSections.reports:
-        container = AdminReportsPage();
-        break;
-      case DrawerSections.users:
-        container = AdminUsersPage();
+      case DrawerSections.history:
+        container = HistoryPage();
         break;
       case DrawerSections.profile:
-        container = AdminProfilePage();
+        container = SalesProfilePage();
         break;
       case DrawerSections.logout:
         container = LoginScreen();
@@ -92,7 +74,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
               children: [
                 Column(
                   children: [
-                    AdminDrawerHeader(),
+                    SalesDrawerHeader(),
                     MyDrawerList(),
                   ],
                 ),
@@ -115,22 +97,16 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           menuItem(1, "Dashboard", Icons.dashboard_outlined,
               currentPage == DrawerSections.dashboard),
           Divider(),
-          menuItem(2, "Product", Icons.shopping_cart_outlined,
-              currentPage == DrawerSections.product),
-          menuItem(3, "Inventory", Icons.inventory_outlined,
-              currentPage == DrawerSections.inventory),
+          menuItem(2, "Pos", Icons.countertops_outlined,
+              currentPage == DrawerSections.pos),
           Divider(),
-          menuItem(4, "Sales", Icons.monetization_on_outlined,
-              currentPage == DrawerSections.sales),
-          menuItem(5, "Reports", Icons.report_outlined,
-              currentPage == DrawerSections.reports),
+          menuItem(3, "History", Icons.countertops_outlined,
+              currentPage == DrawerSections.history),
           Divider(),
-          menuItem(6, "Users", Icons.people_alt_outlined,
-              currentPage == DrawerSections.users),
-          menuItem(7, "Profile", Icons.perm_identity_outlined,
+          menuItem(4, "Profile", Icons.perm_identity_outlined,
               currentPage == DrawerSections.profile),
           Divider(),
-          menuItem(8, "Logout", Icons.logout,
+          menuItem(5, "Logout", Icons.logout,
               currentPage == DrawerSections.logout),
         ],
       ),
@@ -143,7 +119,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
       child: InkWell(
         onTap: () {
           Navigator.pop(context);
-          if (id == 8) {
+          if (id == 4) {
             _showLogoutDialog();
           } else {
             setState(() {
@@ -152,21 +128,12 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
                   currentPage = DrawerSections.dashboard;
                   break;
                 case 2:
-                  currentPage = DrawerSections.product;
+                  currentPage = DrawerSections.pos;
                   break;
                 case 3:
-                  currentPage = DrawerSections.inventory;
+                  currentPage = DrawerSections.history;
                   break;
                 case 4:
-                  currentPage = DrawerSections.sales;
-                  break;
-                case 5:
-                  currentPage = DrawerSections.reports;
-                  break;
-                case 6:
-                  currentPage = DrawerSections.users;
-                  break;
-                case 7:
                   currentPage = DrawerSections.profile;
                   break;
               }
@@ -238,7 +205,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
       height: 60,
       width: double.infinity,
       child: Text(
-        "Admin",
+        "Cashier",
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Colors.black,
@@ -249,4 +216,3 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     );
   }
 }
-

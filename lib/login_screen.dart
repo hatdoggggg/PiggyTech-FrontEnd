@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'admin/admin_drawer_list.dart';
+import 'sales/sales_drawer_list.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,9 +28,14 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (isLogin) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AdminDrawerList()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SalesDrawerList()),
         );
       }
     });

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class AdminProfilePage extends StatefulWidget {
-  const AdminProfilePage({super.key});
+class SalesProfilePage extends StatefulWidget {
+  const SalesProfilePage({super.key});
 
   @override
-  _AdminProfilePageState createState() => _AdminProfilePageState();
+  _SalesProfilePageState createState() => _SalesProfilePageState();
 }
 
-class _AdminProfilePageState extends State<AdminProfilePage> {
+class _SalesProfilePageState extends State<SalesProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +21,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               child: Column(
                 children: <Widget>[
                   const CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    backgroundImage: AssetImage('assets/images/logo.png'),
                     radius: 50.0,
                   ),
                   TextButton(
@@ -51,7 +51,6 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               ),
             ),
             buildProfileItem(Icons.person, 'Name', 'Vhenus Tumbaga', () {
-              // Add your onPressed functionality here
               print('Edit Name pressed');
             }),
             Divider(
