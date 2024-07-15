@@ -9,9 +9,21 @@ class PosPage extends StatefulWidget {
 
 class _PosPageState extends State<PosPage> {
   final List<Map<String, dynamic>> _products = [
-    {'name': 'Coffee', 'price': 3.5},
-    {'name': 'Tea', 'price': 2.5},
-    {'name': 'Sandwich', 'price': 5.0},
+    {
+      'name': 'Booster',
+      'price': 1000,
+      'image': 'assets/images/logo.png',
+    },
+    {
+      'name': 'Starter',
+      'price': 1250,
+      'image': 'assets/images/logo.png',
+    },
+    {
+      'name': 'Grower',
+      'price': 1050,
+      'image': 'assets/images/logo.png',
+    },
   ];
 
   final Map<String, int> _cart = {};
@@ -51,19 +63,83 @@ class _PosPageState extends State<PosPage> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1,
+              ),
               itemCount: _products.length,
               itemBuilder: (context, index) {
                 final product = _products[index];
-                return ListTile(
-                  title: Text(product['name']),
-                  trailing: Text('₱${product['price']}'),
+                return GestureDetector(
                   onTap: () => _addToCart(product),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 4.0,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(8.0),
+                              ),
+                              image: DecorationImage(
+                                image: AssetImage(product['image']),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                product['name'],
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4.0),
+                              Text(
+                                '₱${product['price']}',
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),
           ),
           Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Your Cart',
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Items: ${_cart.length}',
+                  style: TextStyle(fontSize: 14.0, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _cart.length,
@@ -90,6 +166,8 @@ class _PosPageState extends State<PosPage> {
               },
             ),
           ),
+
+
           Divider(),
           Padding(
             padding: const EdgeInsets.all(8.0),
