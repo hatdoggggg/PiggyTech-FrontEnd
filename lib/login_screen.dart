@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
+import 'services/user.dart';
 import 'admin/admin_drawer_list.dart';
 import 'sales/sales_drawer_list.dart';
 
@@ -11,40 +14,125 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordVisible = false;
-  bool _isLoading = false;
+  final formKey = GlobalKey<FormState>();
+  String email = '';
+  String password = '';
+  bool isPasswordVisible = false;
+  bool isLoading = false;
 
-  void _login(bool isLogin) {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<Map<String, dynamic>> login(User user) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8080/api/v1/auth/login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(<String, dynamic>{
+        'usernameOrEmail': user.email,
+        'password': user.password
+      }),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to login');
+    }
+  }
 
-    // Simulate a delay for the login process
-    Future.delayed(const Duration(seconds: 1), () {
+  void _login() async {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
       setState(() {
-        _isLoading = false;
+        isLoading = true;
       });
 
-      if (isLogin) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminDrawerList()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => SalesDrawerList()),
-        );
+      User user = User(
+        username: '',
+        email: email,
+        password: password,
+      );
+
+      try {
+        Map<String, dynamic> loginResponse = await login(user);
+        setState(() {
+          isLoading = false;
+        });
+
+        if (loginResponse.containsKey('roles')) {
+          List<dynamic> roles = loginResponse['roles'];
+          if (roles.contains('ROLE_ADMIN')) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminDrawerList()),
+            );
+          } else if (roles.contains('ROLE_USER')) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => SalesDrawerList()),
+            );
+          } else {
+            showErrorDialog('User role not recognized');
+          }
+        } else {
+          showErrorDialog('Roles not found in the response');
+        }
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+        showErrorDialog('Failed to login');
       }
-    });
+    }
+  }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Login Failed'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Login Successful'),
+          content: Text('You have successfully logged in.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminDrawerList()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.yellow,
         body: Stack(
           children: [
@@ -61,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
-            if (_isLoading)
+            if (isLoading)
               Container(
                 color: Colors.black.withOpacity(0.5),
                 child: const Center(
@@ -90,84 +178,82 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  _inputField(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _emailController,
-          decoration: InputDecoration(
-            hintText: "Email",
-            border: OutlineInputBorder(
+  Widget _inputField(BuildContext context) {
+    return Form(
+      key: formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          TextFormField(
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              hintText: 'Email',
+              border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none),
-            fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
-            filled: true,
-            prefixIcon: Icon(Icons.person),
+                borderSide: BorderSide.none,
+              ),
+              fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              filled: true,
+              prefixIcon: Icon(Icons.person),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please provide an email';
+              }
+              return null;
+            },
+            onSaved: (value) {
+              email = value!;
+            },
           ),
-        ),
-        SizedBox(height: 10),
-        TextField(
-          controller: _passwordController,
-          decoration: InputDecoration(
-            hintText: "Password",
-            border: OutlineInputBorder(
+          SizedBox(height: 10),
+          TextFormField(
+            decoration: InputDecoration(
+              hintText: 'Password',
+              border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none),
-            fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
-            filled: true,
-            prefixIcon: Icon(Icons.lock),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                borderSide: BorderSide.none,
               ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordVisible = !_isPasswordVisible;
-                });
-              },
+              fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+              filled: true,
+              prefixIcon: Icon(Icons.lock),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    isPasswordVisible = !isPasswordVisible;
+                  });
+                },
+              ),
             ),
+            obscureText: !isPasswordVisible,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              }
+              if (value.length < 8) {
+                return 'Password should be at least 8 characters long';
+              }
+              return null;
+            },
+            onSaved: (value) {
+              password = value!;
+            },
           ),
-          obscureText: !_isPasswordVisible,
-        ),
-        SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                print("Email: ${_emailController.text}");
-                print("Password: ${_passwordController.text}");
-                _login(true); // Login to Admin
-              },
-              child: Text(
-                "Login to Admin",
-                style: TextStyle(fontSize: 15),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: _login,
+                child: isLoading ? CircularProgressIndicator() : Text('Login'),
               ),
-              style: ElevatedButton.styleFrom(
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 15),
-              ),
-            ),
-            SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                print("Email: ${_emailController.text}");
-                print("Password: ${_passwordController.text}");
-                _login(false); // Login to Cashier
-              },
-              child: Text(
-                "Login to Cashier",
-                style: TextStyle(fontSize: 15),
-              ),
-              style: ElevatedButton.styleFrom(
-                shape: StadiumBorder(),
-                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 15),
-              ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
