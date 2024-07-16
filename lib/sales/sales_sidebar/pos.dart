@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'checkout_page.dart'; // Import the checkout page
 
 class PosPage extends StatefulWidget {
   const PosPage({super.key});
@@ -17,12 +18,37 @@ class _PosPageState extends State<PosPage> {
     {
       'name': 'Starter',
       'price': 1250,
-      'image': 'assets/images/logo.png',
+      'image': 'assets/images/background.png',
     },
     {
       'name': 'Grower',
       'price': 1050,
       'image': 'assets/images/logo.png',
+    },
+    {
+      'name': 'Booster 1',
+      'price': 1000,
+      'image': 'assets/images/background.png',
+    },
+    {
+      'name': 'Grower 2',
+      'price': 1000,
+      'image': 'assets/images/logo.png',
+    },
+    {
+      'name': 'Starter',
+      'price': 1250,
+      'image': 'assets/images/background.png',
+    },
+    {
+      'name': 'Starter',
+      'price': 1250,
+      'image': 'assets/images/logo.png',
+    },
+    {
+      'name': 'Starter',
+      'price': 1250,
+      'image': 'assets/images/background.png',
     },
   ];
 
@@ -73,52 +99,7 @@ class _PosPageState extends State<PosPage> {
                 final product = _products[index];
                 return GestureDetector(
                   onTap: () => _addToCart(product),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    elevation: 4.0,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(8.0),
-                              ),
-                              image: DecorationImage(
-                                image: AssetImage(product['image']),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Text(
-                                product['name'],
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 4.0),
-                              Text(
-                                '₱${product['price']}',
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: ProductCard(product: product),
                 );
               },
             ),
@@ -135,39 +116,27 @@ class _PosPageState extends State<PosPage> {
                 ),
                 Text(
                   'Items: ${_cart.length}',
-                  style: TextStyle(fontSize: 14.0, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 14.0, color: Colors.grey[900]),
                 ),
               ],
             ),
           ),
-          Expanded(
+          Container(
+            height: 100.0,
             child: ListView.builder(
               itemCount: _cart.length,
               itemBuilder: (context, index) {
                 final cartItem = _cart.entries.toList()[index];
                 final product = _products.firstWhere((element) => element['name'] == cartItem.key);
-                return ListTile(
-                  title: Text('${cartItem.key} x${cartItem.value}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.remove),
-                        onPressed: () => _removeFromCart(product),
-                      ),
-                      Text('₱${(product['price'] * cartItem.value).toStringAsFixed(2)}'),
-                      IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () => _addToCart(product),
-                      ),
-                    ],
-                  ),
+                return CartItem(
+                  product: product,
+                  quantity: cartItem.value,
+                  onAdd: () => _addToCart(product),
+                  onRemove: () => _removeFromCart(product),
                 );
               },
             ),
           ),
-
-
           Divider(),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -180,12 +149,107 @@ class _PosPageState extends State<PosPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Handle checkout logic here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutPage(cart: _cart, products: _products),
+                      ),
+                    );
                   },
                   child: Text('Checkout'),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProductCard extends StatelessWidget {
+  final Map<String, dynamic> product;
+  const ProductCard({Key? key, required this.product}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      elevation: 4.0,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(8.0),
+                ),
+                image: DecorationImage(
+                  image: AssetImage(product['image']),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Text(
+                  product['name'],
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4.0),
+                Text(
+                  '₱${product['price']}',
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CartItem extends StatelessWidget {
+  final Map<String, dynamic> product;
+  final int quantity;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
+  const CartItem({
+    Key? key,
+    required this.product,
+    required this.quantity,
+    required this.onAdd,
+    required this.onRemove,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text('${product['name']} x$quantity'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.remove),
+            onPressed: onRemove,
+          ),
+          Text('₱${(product['price'] * quantity).toStringAsFixed(2)}'),
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: onAdd,
           ),
         ],
       ),
