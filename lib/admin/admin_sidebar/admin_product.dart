@@ -1,4 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import '../../services/product.dart';
 
 class AdminProductPage extends StatefulWidget {
   const AdminProductPage({super.key});
@@ -10,12 +16,33 @@ class AdminProductPage extends StatefulWidget {
 class _AdminProductPageState extends State<AdminProductPage> {
   final TextEditingController _searchController = TextEditingController();
 
-  final List<Map<String, String>> _products = [
-    {"Name": "Mega", "Price": "1", "Stock": "1", "Sold": "1", "Photo": "https://cdn.vectorstock.com/i/1000v/09/60/piggy-vector-2900960.jpg"},
-  ];
+  late Future<List<dynamic>> products;
+
+  Future<List<dynamic>> fetchData() async {
+    final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/product/all') // Android
+      // Uri.parse('http://127.0.0.1:8080/api/v1/product/all')  // Web
+      // Uri.parse('http://---.---.---.---:8080/api/v1/product/all') // IP Address of laptop
+    );
+    final data = jsonDecode(response.body);
+    // print(response.body); //  ----- CHECK IF ERROR THE CONNECT OF BACK END -----
+    List products = <Product>[];
+    for (var product in data) {
+      products.add(Product.fromJson(product));
+    }
+
+    return products;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    products = fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // fetchData(); // ----- CHECK IF ERROR THE CONNECT OF BACK END -----
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -80,63 +107,67 @@ class _AdminProductPageState extends State<AdminProductPage> {
 
   Widget _buildProductTable() {
     return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          child: DataTable(
-            columns: const <DataColumn>[
-              DataColumn(
-                label: Text(
-                  'Name',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+      child: FutureBuilder(
+        future: products,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: SpinKitRing(
+                color: Colors.black,
+                size: 60.0,
               ),
-              DataColumn(
-                label: Text(
-                  'Price',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+            );
+          }
+          if (snapshot.hasData) {
+            List products = snapshot.data!;
+            return Padding(
+              padding: EdgeInsets.all(3.0),
+              child: ListView.builder(
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(products[index].photo),
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            products[index].productName,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '₱ ${products[index].price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                      //   Navigator.pushReplacement(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => SelectedProduct(product: products[index]),
+                      //     ),
+                      //   );
+                      },
+                    ),
+                  );
+                },
               ),
-              DataColumn(
-                label: Text(
-                  'Stock',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Sold',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  'Photo',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-            rows: _products.map((product) {
-              return DataRow(
-                cells: [
-                  DataCell(Text(product["Name"]!)),
-                  DataCell(Text(product["Price"]!)),
-                  DataCell(Text(product["Stock"]!)),
-                  DataCell(Text(product["Sold"]!)),
-                  DataCell(
-                    product["Photo"] != null && product["Photo"]!.isNotEmpty
-                        ? Image.network(
-                      product["Photo"]!,
-                      width: 50,
-                      height: 50,
-                    )
-                        : Text('No Image'),
-                  ),
-                ],
-              );
-            }).toList(),
-          ),
-        ),
+            );
+          }
+          return Center(
+            child: Text('Unable to load data'),
+          );
+        },
       ),
     );
   }
