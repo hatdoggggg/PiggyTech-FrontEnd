@@ -8,12 +8,10 @@ class AdminProductPage extends StatefulWidget {
 }
 
 class _AdminProductPageState extends State<AdminProductPage> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   final List<Map<String, String>> _products = [
-    {"Name": "Mega", "Received Date": "May 01, 2024", "Expiration Date": "June 25, 2025"},
-    {"Name": "Muscle Max", "Received Date": "May 01, 2024", "Expiration Date": "June 25, 2025"},
-    {"Name": "CJ Supreme Pre", "Received Date": "May 01, 2024", "Expiration Date": "June 25, 2025"},
+    {"Name": "Mega", "Price": "1", "Stock": "1", "Sold": "1", "Photo": "https://cdn.vectorstock.com/i/1000v/09/60/piggy-vector-2900960.jpg"},
   ];
 
   @override
@@ -24,7 +22,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
         child: Column(
           children: [
             _buildSearchBarWithFunnel(),
-            SizedBox(height: 5.0), // Space between search bar and table
+            SizedBox(height: 10.0), // Space between search bar and table
             _buildProductTable(),
           ],
         ),
@@ -84,36 +82,60 @@ class _AdminProductPageState extends State<AdminProductPage> {
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const <DataColumn>[
-            DataColumn(
-              label: Text(
-                'Name',
-                style: TextStyle(fontWeight: FontWeight.bold),
+        child: SingleChildScrollView(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text(
+                  'Name',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            DataColumn(
-              label: Text(
-                'Received Date',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              DataColumn(
+                label: Text(
+                  'Price',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            DataColumn(
-              label: Text(
-                'Expiration Date',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              DataColumn(
+                label: Text(
+                  'Stock',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          ],
-          rows: _products.map((product) {
-            return DataRow(
-              cells: [
-                DataCell(Text(product["Name"]!)),
-                DataCell(Text(product["Received Date"]!)),
-                DataCell(Text(product["Expiration Date"]!)),
-              ],
-            );
-          }).toList(),
+              DataColumn(
+                label: Text(
+                  'Sold',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Photo',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+            rows: _products.map((product) {
+              return DataRow(
+                cells: [
+                  DataCell(Text(product["Name"]!)),
+                  DataCell(Text(product["Price"]!)),
+                  DataCell(Text(product["Stock"]!)),
+                  DataCell(Text(product["Sold"]!)),
+                  DataCell(
+                    product["Photo"] != null && product["Photo"]!.isNotEmpty
+                        ? Image.network(
+                      product["Photo"]!,
+                      width: 50,
+                      height: 50,
+                    )
+                        : Text('No Image'),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
