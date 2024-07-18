@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'services/user.dart';
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           isLoading = false;
         });
-        showErrorDialog('Failed to login');
+        showErrorDialog('Incorrect email or password. Please try again');
       }
     }
   }
@@ -247,8 +248,8 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: _login,
-                child: isLoading ? CircularProgressIndicator() : Text('Login'),
+                onPressed: isLoading ? null: _login,
+                child: Text('Login'),
               ),
             ],
           ),
