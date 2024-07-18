@@ -129,6 +129,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundImage: NetworkImage(products[index].photo),
+                        // backgroundImage: Image.asset(products[index].photo),
                       ),
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

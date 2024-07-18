@@ -1,4 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import '../../services/user_all.dart';
 
 class AdminUsersPage extends StatefulWidget {
   const AdminUsersPage({super.key});
@@ -8,29 +14,48 @@ class AdminUsersPage extends StatefulWidget {
 }
 
 class _AdminUsersPageState extends State<AdminUsersPage> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
-  final List<Map<String, String>> _users = [
-    {"Name": "Vhenus Tumbaga", "Address": "Calaca city", "Phone no": "0123456789"},
-    {"Name": "Rinalyn Oriendo", "Address": "Calaca city", "Phone no": "0123456789"},
-    {"Name": "Yana Valencia", "Address": "Calaca city", "Phone no": "0123456789"},
-  ];
+  late Future<List<dynamic>> user_alls;
+
+  Future<List<dynamic>> fetchData() async {
+    final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/auth/all') // Android
+      // Uri.parse('http://127.0.0.1:8080/api/v1/auth/all')  // Web
+      // Uri.parse('http://---.---.---.---:8080/api/v1/auth/all') // IP Address of laptop
+    );
+    final data = jsonDecode(response.body);
+    // print(response.body); //  ----- CHECK IF ERROR THE CONNECT OF BACK END -----
+    List user_alls = <User_all>[];
+    for (var user_all in data) {
+      user_alls.add(User_all.fromJson(user_all));
+    }
+
+    return user_alls;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    user_alls = fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // fetchData(); // ----- CHECK IF ERROR THE CONNECT OF BACK END -----
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             _buildSearchBarWithFunnel(),
-            SizedBox(height: 5.0),
-            _buildUserTable(),
+            SizedBox(height: 10.0), // Space between search bar and table
+            _buildProductTable(),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewUser,
+        onPressed: _addNewProduct,
         child: Icon(Icons.add),
         backgroundColor: Colors.yellow,
       ),
@@ -45,11 +70,11 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search...',
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: Icon(Icons.search), // Add the search icon
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
-                  color: Colors.yellow,
+                  color: Colors.blue,
                 ),
               ),
               filled: true,
@@ -80,59 +105,82 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
-  Widget _buildUserTable() {
+  Widget _buildProductTable() {
     return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: const <DataColumn>[
-            DataColumn(
-              label: Text(
-                'Name',
-                style: TextStyle(fontWeight: FontWeight.bold),
+      child: FutureBuilder(
+        future: user_alls,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: SpinKitRing(
+                color: Colors.black,
+                size: 60.0,
               ),
-            ),
-            DataColumn(
-              label: Text(
-                'Address',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            DataColumn(
-              label: Text(
-                'Phone no',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-          rows: _users.map((user) {
-            return DataRow(
-              cells: [
-                DataCell(Text(user["Name"]!)),
-                DataCell(Text(user["Address"]!)),
-                DataCell(Text(user["Phone no"]!)),
-              ],
             );
-          }).toList(),
-        ),
+          }
+          if (snapshot.hasData) {
+            List user_alls = snapshot.data!;
+            return Padding(
+              padding: EdgeInsets.all(3.0),
+              child: ListView.builder(
+                itemCount: user_alls.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: ListTile(
+                      // leading: CircleAvatar(
+                      //   backgroundImage: NetworkImage(products[index].photo),
+                      //   // backgroundImage: Image.asset(products[index].photo),
+                      // ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user_alls[index].username,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            user_alls[index].email,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        //   Navigator.pushReplacement(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => SelectedProduct(product: products[index]),
+                        //     ),
+                        //   );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+          return Center(
+            child: Text('Unable to load data'),
+          );
+        },
       ),
     );
   }
 
-  void _addNewUser() {
-    // Handle adding a new user here
+  void _addNewProduct() {
+    // Handle adding a new product here
     print('Add icon pressed');
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchController.dispose(); // Dispose of the controller when the widget is disposed
     super.dispose();
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: AdminUsersPage(),
-  ));
 }
