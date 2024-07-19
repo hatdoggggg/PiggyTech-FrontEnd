@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'services/user.dart';
 import 'admin/admin_drawer_list.dart';
 import 'sales/sales_drawer_list.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -195,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
               filled: true,
-              prefixIcon: Icon(Icons.person),
+              prefixIcon: Icon(Icons.email),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -250,6 +251,36 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: isLoading ? null: _login,
                 child: Text('Login'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Dont have an account?',
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(width: 5.0,),
+              InkWell(
+                child: Text(
+                  'Signup Here',
+                  style: TextStyle(
+                    color: Colors.pink[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onTap: ()=> Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignupScreen()),
+                ),
               ),
             ],
           ),
