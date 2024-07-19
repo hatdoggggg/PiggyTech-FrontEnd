@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart' as http;
+
+import '../../services/product.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -9,6 +14,38 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  late Future<int> productCount;
+
+  Future<int> fetchProductCount() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/product/all'), // Android
+        // Uri.parse('http://127.0.0.1:8080/api/v1/product/all'), // Web
+        // Uri.parse('http://---.---.---.---:8080/api/v1/product/all'), // IP Address of laptop
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List<Product> products = [];
+        for (var product in data) {
+          products.add(Product.fromJson(product));
+        }
+        return products.length; // Return the count of products
+      } else {
+        throw Exception('Failed to load products');
+      }
+    } catch (e) {
+      print('Error fetching product count: $e');
+      return 0; // Return a default value in case of error
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    productCount = fetchProductCount(); // Fetch the count when initializing
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +66,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildSummaryBox("Total Users", "3"),
-                _buildSummaryBox("Total Product", "3"),
+                FutureBuilder<int>(
+                  future: productCount,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildSummaryBox("Total Product", "Loading...");
+                    } else if (snapshot.hasError) {
+                      return _buildSummaryBox("Total Product", "Error");
+                    } else {
+                      return _buildSummaryBox("Total Product", snapshot.data?.toString() ?? "0");
+                    }
+                  },
+                ),
                 _buildSummaryBox("Total Sales", "11,300"),
               ],
             ),

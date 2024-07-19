@@ -8,7 +8,6 @@ import 'admin_sidebar/admin_reports.dart';
 import 'admin_sidebar/admin_users.dart';
 import 'admin_sidebar/admin_profile.dart';
 import 'admin_drawer_header.dart';
-
 import '/login_screen.dart';
 
 enum DrawerSections {
@@ -23,12 +22,16 @@ enum DrawerSections {
 }
 
 class AdminDrawerList extends StatefulWidget {
+  final DrawerSections initialPage;
+
+  AdminDrawerList({this.initialPage = DrawerSections.dashboard});
+
   @override
   _AdminDrawerListState createState() => _AdminDrawerListState();
 }
 
 class _AdminDrawerListState extends State<AdminDrawerList> {
-  var currentPage = DrawerSections.dashboard;
+  late DrawerSections currentPage;
 
   // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
@@ -41,6 +44,12 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
   };
+
+  @override
+  void initState() {
+    super.initState();
+    currentPage = widget.initialPage;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,31 +116,21 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
 
   Widget MyDrawerList() {
     return Container(
-      padding: EdgeInsets.only(
-        top: 15,
-      ),
+      padding: EdgeInsets.only(top: 15),
       child: Column(
         children: [
-          menuItem(1, "Dashboard", Icons.dashboard_outlined,
-              currentPage == DrawerSections.dashboard),
+          menuItem(1, "Dashboard", Icons.dashboard_outlined, currentPage == DrawerSections.dashboard),
           Divider(),
-          menuItem(2, "Product", Icons.shopping_cart_outlined,
-              currentPage == DrawerSections.product),
-          menuItem(3, "Inventory", Icons.inventory_outlined,
-              currentPage == DrawerSections.inventory),
+          menuItem(2, "Product", Icons.shopping_cart_outlined, currentPage == DrawerSections.product),
+          menuItem(3, "Inventory", Icons.inventory_outlined, currentPage == DrawerSections.inventory),
           Divider(),
-          menuItem(4, "Sales", Icons.monetization_on_outlined,
-              currentPage == DrawerSections.sales),
-          menuItem(5, "Reports", Icons.report_outlined,
-              currentPage == DrawerSections.reports),
+          menuItem(4, "Sales", Icons.monetization_on_outlined, currentPage == DrawerSections.sales),
+          menuItem(5, "Reports", Icons.report_outlined, currentPage == DrawerSections.reports),
           Divider(),
-          menuItem(6, "Users", Icons.people_alt_outlined,
-              currentPage == DrawerSections.users),
-          menuItem(7, "Profile", Icons.perm_identity_outlined,
-              currentPage == DrawerSections.profile),
+          menuItem(6, "Users", Icons.people_alt_outlined, currentPage == DrawerSections.users),
+          menuItem(7, "Profile", Icons.perm_identity_outlined, currentPage == DrawerSections.profile),
           Divider(),
-          menuItem(8, "Logout", Icons.logout,
-              currentPage == DrawerSections.logout),
+          menuItem(8, "Logout", Icons.logout, currentPage == DrawerSections.logout),
         ],
       ),
     );
@@ -249,4 +248,3 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     );
   }
 }
-
