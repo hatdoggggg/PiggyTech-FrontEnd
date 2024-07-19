@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'userdetail_screen.dart';
 import 'login_screen.dart';
 import 'services/user.dart';
 
@@ -145,9 +146,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // Navigator.pushReplacement(
-                            //     context,
-                            //     MaterialPageRoute(builder: (context) => UserDetailScreen())
+                             Navigator.pushReplacement(
+                                 context,
+                              MaterialPageRoute(builder: (context) => UserDetailScreen()),
+                             );
                           },
                           child: Text('Sign Up'),
                           style: ElevatedButton.styleFrom(

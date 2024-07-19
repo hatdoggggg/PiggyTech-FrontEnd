@@ -23,10 +23,15 @@ class _SelectedProductState extends State<SelectedProduct> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white60,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Product'),
-        backgroundColor: Colors.white,
+        title: Text(
+            'Product',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.yellow,
         foregroundColor: Colors.black,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -53,7 +58,7 @@ class _SelectedProductState extends State<SelectedProduct> {
                   child: Image.network(product.photo), // Network image
                       // Image.asset(product.url), //Local
                 ),
-                SizedBox(height: 10.0,),
+                SizedBox(height: 50.0,),
                 Column(
                   children: [
                     Padding(

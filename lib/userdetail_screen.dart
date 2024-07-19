@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
-class Signup extends StatefulWidget {
+class UserDetailScreen extends StatefulWidget {
   @override
-  State<Signup> createState() => _SignupState();
+  State<UserDetailScreen> createState() => _UserDetailScreenState();
 }
 
-class _SignupState extends State<Signup> {
+class _UserDetailScreenState extends State<UserDetailScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>(); // Define GlobalKey
 
   String phoneNumber = '';
@@ -17,7 +18,7 @@ class _SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.yellow,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(15.0, 50.0, 10.0, 0),
@@ -25,7 +26,7 @@ class _SignupState extends State<Signup> {
             children: <Widget>[
               SizedBox(height: 130.0),
               Text(
-                'Let\'s Get Started!',
+                'Fill your Information!',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2.0,
@@ -45,7 +46,10 @@ class _SignupState extends State<Signup> {
                         prefixIcon: Icon(Icons.phone),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
+                          borderSide: BorderSide.none,
                         ),
+                        fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                        filled: true,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -65,7 +69,10 @@ class _SignupState extends State<Signup> {
                         prefixIcon: Icon(Icons.home),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
+                          borderSide: BorderSide.none,
                         ),
+                        fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                        filled: true,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -86,11 +93,14 @@ class _SignupState extends State<Signup> {
                             prefixIcon: Icon(Icons.male),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20.0),
+                              borderSide: BorderSide.none,
                             ),
+                            fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                            filled: true,
                           ),
                           isEmpty: gender == '',
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               Radio<String>(
                                 value: 'male',
@@ -127,52 +137,30 @@ class _SignupState extends State<Signup> {
                     SizedBox(height: 25.0),
                     ElevatedButton(
                       onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          // Proceed with form submission
-                          print('Phone Number: $phoneNumber');
-                          print('Address: $address');
-                          print('Gender: $gender');
-                        }
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginScreen()),
+                        );
+                        // if (formKey.currentState!.validate()) {
+                        //   // Proceed with form submission
+                        //   print('Phone Number: $phoneNumber');
+                        //   print('Address: $address');
+                        //   print('Gender: $gender');
+                        // }
                       },
-                      child: Text('Sign Up'),
+                      child: Text('Okay'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pinkAccent,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 10.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          'Already have an account?',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        SizedBox(width: 5.0),
-                        InkWell(
-                          child: Text(
-                            'Log in here',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                          onTap: () {
-                            Navigator.popAndPushNamed(context, '/login');
-                          },
-                        ),
                       ],
                     ),
-                  ],
-                ),
               ),
             ],
+                ),
+            ),
           ),
-        ),
-      ),
-    );
+        );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: Signup(),
-  ));
 }
