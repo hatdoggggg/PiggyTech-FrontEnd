@@ -7,17 +7,16 @@ class UserDetailScreen extends StatefulWidget {
 }
 
 class _UserDetailScreenState extends State<UserDetailScreen> {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>(); // Define GlobalKey
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   String phoneNumber = '';
   String address = '';
-  String gender = ''; // To store selected gender
-  bool _obscure = true;
-  IconData _obscureIcon = Icons.visibility_off;
+  String gender = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.yellow,
       body: SafeArea(
         child: Padding(
@@ -35,14 +34,14 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
               ),
               SizedBox(height: 30.0),
               Form(
-                key: formKey, // Use widget.formKey here
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     TextFormField(
                       maxLength: 11,
                       decoration: InputDecoration(
-                        labelText: 'Phone Number',
+                        hintText: 'Phone Number',
                         prefixIcon: Icon(Icons.phone),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
@@ -61,11 +60,11 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                         phoneNumber = value;
                       },
                     ),
-                    SizedBox(height: 30.0),
+                    SizedBox(height: 15.0),
                     TextFormField(
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        labelText: 'Address',
+                        hintText: 'Address',
                         prefixIcon: Icon(Icons.home),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
@@ -85,82 +84,84 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       },
                     ),
                     SizedBox(height: 30.0),
+                    Text(
+                      'Gender',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
                     FormField<String>(
                       builder: (FormFieldState<String> state) {
-                        return InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Gender',
-                            prefixIcon: Icon(Icons.male),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                              borderSide: BorderSide.none,
+                        return Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Radio<String>(
+                                  value: 'male',
+                                  groupValue: gender,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      gender = value!;
+                                    });
+                                  },
+                                ),
+                                Text('Male'),
+                                SizedBox(width: 20),
+                                Radio<String>(
+                                  value: 'female',
+                                  groupValue: gender,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      gender = value!;
+                                    });
+                                  },
+                                ),
+                                Text('Female'),
+                              ],
                             ),
-                            fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                            filled: true,
-                          ),
-                          isEmpty: gender == '',
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Radio<String>(
-                                value: 'male',
-                                groupValue: gender,
-                                onChanged: (value) {
-                                  setState(() {
-                                    gender = value!;
-                                  });
-                                },
-                              ),
-                              Text('Male'),
-                              SizedBox(width: 20),
-                              Radio<String>(
-                                value: 'female',
-                                groupValue: gender,
-                                onChanged: (value) {
-                                  setState(() {
-                                    gender = value!;
-                                  });
-                                },
-                              ),
-                              Text('Female'),
-                            ],
-                          ),
+                            state.hasError
+                                ? Text(
+                              state.errorText ?? '',
+                              style: TextStyle(color: Colors.red),
+                            )
+                                : Container(),
+                          ],
                         );
                       },
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (gender.isEmpty) {
                           return 'Please select a gender';
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: 25.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginScreen()),
-                        );
-                        // if (formKey.currentState!.validate()) {
-                        //   // Proceed with form submission
-                        //   print('Phone Number: $phoneNumber');
-                        //   print('Address: $address');
-                        //   print('Gender: $gender');
-                        // }
-                      },
-                      child: Text('Okay'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                      ),
-                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => LoginScreen()),
+                              );
+                            }
+                          },
+                          child: Text('Okay'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                          ),
+                        ),
                       ],
                     ),
+                  ],
+                ),
               ),
             ],
-                ),
-            ),
           ),
-        );
+        ),
+      ),
+    );
   }
 }

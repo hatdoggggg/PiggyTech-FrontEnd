@@ -25,14 +25,15 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.yellow,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(15.0, 50.0, 10.0, 0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              SizedBox(height: 1.0,),
+              SizedBox(height: 130.0),
               Text(
                 'Create an Account!',
                 style: TextStyle(
@@ -50,7 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextFormField(
                       maxLength: 40,
                       decoration: InputDecoration(
-                        label: Text('Name'),
+                        hintText: 'Name',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
                           borderSide: BorderSide.none,
@@ -76,7 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextFormField(
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        label: Text('Email'),
+                        hintText: 'Email',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
                           borderSide: BorderSide.none,
@@ -116,7 +117,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             });
                           },
                         ),
-                        label: Text('Password'),
+                        hintText: 'Password',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
                           borderSide: BorderSide.none,
