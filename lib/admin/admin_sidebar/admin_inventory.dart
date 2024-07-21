@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 
 class AdminInventoryPage extends StatefulWidget {
   const AdminInventoryPage({super.key});
