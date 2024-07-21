@@ -186,7 +186,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchController.dispose(); // Dispose of the controller when the widget is disposed
     super.dispose();
   }
 }

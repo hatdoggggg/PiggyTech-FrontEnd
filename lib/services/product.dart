@@ -36,4 +36,5 @@ class Product{
       _ => throw const FormatException('Failed to products')
     };
   }
+
 }

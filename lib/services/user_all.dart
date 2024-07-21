@@ -1,31 +1,28 @@
-class User_all{
-  int id;
-  String username;
-  String email;
-  String password;
+class User_all {
+  final String username;
+  final String email;
+  final String address;
+  final String phone;
+  final String photo;
+  final DateTime createdAt;
 
   User_all({
-    required this.id,
     required this.username,
     required this.email,
-    required this.password
+    required this.address,
+    required this.phone,
+    required this.photo,
+    required this.createdAt,
   });
 
-  factory User_all.fromJson(Map<String, dynamic>json){
-    return switch(json){
-      {
-      'id' : int id,
-      'username' : String username,
-      'email' : String email,
-      'password' : String password
-      } =>
-          User_all(
-              id: id,
-              username: username,
-              email: email,
-              password: password
-          ),
-      _ => throw const FormatException('Failed to users')
-    };
+  factory User_all.fromJson(Map<String, dynamic> json) {
+    return User_all(
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      address: json['address'] ?? '',
+      phone: json['phone'] ?? '',
+      photo: json['photo'] ?? '',
+      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+    );
   }
 }
