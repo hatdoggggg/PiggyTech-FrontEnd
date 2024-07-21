@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
       nextScreen: const LoginScreen(), // Change this to your actual next screen widget
       splashIconSize: 300,
       backgroundColor: Colors.yellow,
-      duration: 15000, // Duration in milliseconds (3000ms = 3 seconds)
+      duration: 6000, // Duration in milliseconds (3000ms = 3 seconds)
       splashTransition: SplashTransition.fadeTransition, // Optional: specify a transition effect
     );
   }

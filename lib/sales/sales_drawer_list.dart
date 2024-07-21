@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:piggytech/sales/sales_sidebar/pos.dart';
 
+import 'sales_sidebar/pos.dart';
 import 'sales_sidebar/sales_dashboard.dart';
 import 'sales_sidebar/history.dart';
 import 'sales_sidebar/sales_profile.dart';

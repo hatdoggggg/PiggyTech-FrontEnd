@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import '/../services/user_all.dart'; // Update the import to point to your user model
 
 class SelectedUsers extends StatelessWidget {
@@ -57,12 +59,17 @@ class SelectedUsers extends StatelessWidget {
             ),
             SizedBox(height: 10.0),
             Text(
-              'Created At: ${user_all.createdAt.toLocal()}'.split(' ')[0],
+              'Created At: ${formatDate(user_all.createdAt)}',
               style: TextStyle(fontSize: 20.0),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String formatDate(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    return formatter.format(dateTime);
   }
 }

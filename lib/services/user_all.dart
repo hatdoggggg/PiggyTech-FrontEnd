@@ -22,7 +22,7 @@ class User_all {
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
       photo: json['photo'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 }
