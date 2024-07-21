@@ -56,8 +56,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                         }
                         return null;
                       },
-                      onChanged: (value) {
-                        phoneNumber = value;
+                      onSaved: (value) {
+                        phoneNumber = value!;
                       },
                     ),
                     SizedBox(height: 15.0),
@@ -79,51 +79,87 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                         }
                         return null;
                       },
-                      onChanged: (value) {
-                        address = value;
+                      onSaved: (value) {
+                        address = value!;
                       },
                     ),
                     SizedBox(height: 30.0),
-                    Text(
-                      'Gender',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
                     FormField<String>(
                       builder: (FormFieldState<String> state) {
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Radio<String>(
-                                  value: 'male',
-                                  groupValue: gender,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      gender = value!;
-                                    });
-                                  },
+                            InputDecorator(
+                              decoration: InputDecoration(
+                                hintText: 'Gender',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  borderSide: BorderSide.none,
                                 ),
-                                Text('Male'),
-                                SizedBox(width: 20),
-                                Radio<String>(
-                                  value: 'female',
-                                  groupValue: gender,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      gender = value!;
-                                    });
-                                  },
-                                ),
-                                Text('Female'),
-                              ],
+                                fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                                filled: true,
+                              ),
+                              child: Column(
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(Icons.male),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Select Gender:',
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Row(
+                                        children: <Widget>[
+                                          Radio<String>(
+                                            value: 'male',
+                                            groupValue: gender,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                gender = value!;
+                                                state.didChange(value);
+                                              });
+                                            },
+                                          ),
+                                          Text('Male'),
+                                        ],
+                                      ),
+                                      SizedBox(width: 20),
+                                      Row(
+                                        children: <Widget>[
+                                          Radio<String>(
+                                            value: 'female',
+                                            groupValue: gender,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                gender = value!;
+                                                state.didChange(value);
+                                              });
+                                            },
+                                          ),
+                                          Text('Female'),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            state.hasError
-                                ? Text(
-                              state.errorText ?? '',
-                              style: TextStyle(color: Colors.red),
-                            )
-                                : Container(),
+                            if (state.hasError)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 20.0, top: 5.0),
+                                child: Text(
+                                  state.errorText!,
+                                  style: TextStyle(color: Colors.red, fontSize: 12.0),
+                                ),
+                              ),
                           ],
                         );
                       },
@@ -140,12 +176,10 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => LoginScreen()),
-                              );
-                            }
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginScreen()),
+                            );
                           },
                           child: Text('Okay'),
                           style: ElevatedButton.styleFrom(

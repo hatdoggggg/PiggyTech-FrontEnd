@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../services/user_all.dart';
+import 'admin_users/selectedUsers.dart';
 
 class AdminUsersPage extends StatefulWidget {
   const AdminUsersPage({super.key});
@@ -16,33 +17,31 @@ class AdminUsersPage extends StatefulWidget {
 class _AdminUsersPageState extends State<AdminUsersPage> {
   final TextEditingController _searchController = TextEditingController();
 
-  late Future<List<dynamic>> user_alls;
+  late Future<List<User_all>> user_all;
 
-  Future<List<dynamic>> fetchData() async {
+  Future<List<User_all>> fetchData() async {
     final response = await http.get(
         Uri.parse('http://10.0.2.2:8080/api/v1/auth/all') // Android
       // Uri.parse('http://127.0.0.1:8080/api/v1/auth/all')  // Web
       // Uri.parse('http://---.---.---.---:8080/api/v1/auth/all') // IP Address of laptop
     );
-    final data = jsonDecode(response.body);
-    // print(response.body); //  ----- CHECK IF ERROR THE CONNECT OF BACK END -----
-    List user_alls = <User_all>[];
-    for (var user_all in data) {
-      user_alls.add(User_all.fromJson(user_all));
-    }
 
-    return user_alls;
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List<dynamic>;
+      return data.map((json) => User_all.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    user_alls = fetchData();
+    user_all = fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
-    // fetchData(); // ----- CHECK IF ERROR THE CONNECT OF BACK END -----
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -107,8 +106,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
 
   Widget _buildProductTable() {
     return Expanded(
-      child: FutureBuilder(
-        future: user_alls,
+      child: FutureBuilder<List<User_all>>(
+        future: user_all,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -119,23 +118,20 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             );
           }
           if (snapshot.hasData) {
-            List user_alls = snapshot.data!;
+            List<User_all> users = snapshot.data!;
             return Padding(
               padding: EdgeInsets.all(3.0),
               child: ListView.builder(
-                itemCount: user_alls.length,
+                itemCount: users.length,
                 itemBuilder: (context, index) {
+                  final user = users[index];
                   return Card(
                     child: ListTile(
-                      // leading: CircleAvatar(
-                      //   backgroundImage: NetworkImage(products[index].photo),
-                      //   // backgroundImage: Image.asset(products[index].photo),
-                      // ),
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user_alls[index].username,
+                            user.username,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20.0,
@@ -143,7 +139,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                             ),
                           ),
                           Text(
-                            user_alls[index].email,
+                            user.email,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 15.0,
@@ -152,12 +148,12 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                         ],
                       ),
                       onTap: () {
-                        //   Navigator.pushReplacement(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => SelectedProduct(product: products[index]),
-                        //     ),
-                        //   );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SelectedUsers(user_all: user),
+                          ),
+                        );
                       },
                     ),
                   );

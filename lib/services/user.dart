@@ -14,4 +14,5 @@ class User{
     'email' : email,
     'password' : password
   };
+
 }
