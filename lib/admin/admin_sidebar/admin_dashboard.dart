@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
+import 'package:piggytech/services/user_all.dart';
 
 import '../../services/product.dart';
 
@@ -14,7 +15,29 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  late Future<int> userCount;
   late Future<int> productCount;
+
+  Future<int> fetchUserCount() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/auth/all'), // Android
+        // Uri.parse('http://127.0.0.1:8080/api/v1/auth/all'), // Web
+        // Uri.parse('http://---.---.---.---:8080/api/v1/auth/all'), // IP Address of laptop
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        List<User_all> users = data.map((json) => User_all.fromJson(json)).toList();
+        return users.length; // Return the count of users
+      } else {
+        throw Exception('Failed to load users');
+      }
+    } catch (e) {
+      print('Error fetching user count: $e');
+      return 0; // Return a default value in case of error
+    }
+  }
 
   Future<int> fetchProductCount() async {
     try {
@@ -43,6 +66,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   @override
   void initState() {
     super.initState();
+    userCount = fetchUserCount();
     productCount = fetchProductCount(); // Fetch the count when initializing
   }
 
@@ -65,7 +89,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildSummaryBox("Total Users", "3"),
+                FutureBuilder<int>(
+                  future: userCount,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildSummaryBox("Total User", "Loading...");
+                    } else if (snapshot.hasError) {
+                      return _buildSummaryBox("Total User", "Error");
+                    } else {
+                      return _buildSummaryBox("Total User", snapshot.data?.toString() ?? "0");
+                    }
+                  },
+                ),
                 FutureBuilder<int>(
                   future: productCount,
                   builder: (context, snapshot) {
