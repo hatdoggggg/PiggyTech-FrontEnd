@@ -5,7 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../services/product.dart';
+import 'admin_product/add_product.dart';
 import 'admin_product/selectedProduct.dart';
+
 
 class AdminProductPage extends StatefulWidget {
   const AdminProductPage({super.key});
@@ -180,8 +182,10 @@ class _AdminProductPageState extends State<AdminProductPage> {
   }
 
   void _addNewProduct() {
-    // Handle adding a new product here
-    print('Add icon pressed');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddProduct()),
+    );
   }
 
   @override
