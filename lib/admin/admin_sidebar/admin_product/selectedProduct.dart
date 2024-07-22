@@ -5,6 +5,7 @@ import '../../../services/product.dart';
 
 class SelectedProduct extends StatefulWidget {
   final Product product;
+  
   const SelectedProduct({super.key, required this.product});
 
   @override

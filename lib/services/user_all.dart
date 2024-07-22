@@ -3,7 +3,7 @@ class User_all {
   final String email;
   final String address;
   final String phone;
-  final String photo;
+  final String gender;
   final DateTime createdAt;
 
   User_all({
@@ -11,7 +11,7 @@ class User_all {
     required this.email,
     required this.address,
     required this.phone,
-    required this.photo,
+    required this.gender,
     required this.createdAt,
   });
 
@@ -21,7 +21,7 @@ class User_all {
       email: json['email'] ?? '',
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
-      photo: json['photo'] ?? '',
+      gender: json['gender'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
