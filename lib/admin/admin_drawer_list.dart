@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '/services/user_all.dart';
 import 'admin_sidebar/admin_dashboard.dart';
 import 'admin_sidebar/admin_product.dart';
 import 'admin_sidebar/admin_inventory.dart';
@@ -23,8 +24,9 @@ enum DrawerSections {
 
 class AdminDrawerList extends StatefulWidget {
   final DrawerSections initialPage;
+  final User_all userAll;
 
-  AdminDrawerList({this.initialPage = DrawerSections.dashboard});
+  AdminDrawerList({required this.userAll, this.initialPage = DrawerSections.dashboard});
 
   @override
   _AdminDrawerListState createState() => _AdminDrawerListState();
@@ -33,7 +35,6 @@ class AdminDrawerList extends StatefulWidget {
 class _AdminDrawerListState extends State<AdminDrawerList> {
   late DrawerSections currentPage;
 
-  // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
     DrawerSections.product: "Product",
@@ -56,10 +57,10 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     Widget container;
     switch (currentPage) {
       case DrawerSections.dashboard:
-        container = AdminDashboardPage();
+        container = AdminDashboardPage(userAll: widget.userAll);
         break;
       case DrawerSections.product:
-        container = AdminProductPage();
+        container = AdminProductPage(userAll: widget.userAll);
         break;
       case DrawerSections.inventory:
         container = AdminInventoryPage();
@@ -74,7 +75,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
         container = AdminUsersPage();
         break;
       case DrawerSections.profile:
-        container = AdminProfilePage();
+        container = AdminProfilePage(user_all: widget.userAll);
         break;
       case DrawerSections.logout:
         container = LoginScreen();
@@ -85,7 +86,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
       appBar: AppBar(
         backgroundColor: Colors.yellow,
         title: Text(
-          sectionTitles[currentPage] ?? "PiggyTech", // Default to "PiggyTech" if not found
+          sectionTitles[currentPage] ?? "PiggyTech",
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -94,81 +95,54 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
       body: container,
       drawer: Drawer(
         child: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height, // Ensure full screen height
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    AdminDrawerHeader(),
-                    MyDrawerList(),
-                  ],
-                ),
-                Footer(),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AdminDrawerHeader(userAll: widget.userAll),
+              _buildDrawerList(),
+              SizedBox(height: 105),
+              _buildFooter(),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget MyDrawerList() {
+  Widget _buildDrawerList() {
     return Container(
       padding: EdgeInsets.only(top: 15),
       child: Column(
         children: [
-          menuItem(1, "Dashboard", Icons.dashboard_outlined, currentPage == DrawerSections.dashboard),
-          Divider(),
-          menuItem(2, "Product", Icons.shopping_cart_outlined, currentPage == DrawerSections.product),
-          menuItem(3, "Inventory", Icons.inventory_outlined, currentPage == DrawerSections.inventory),
-          Divider(),
-          menuItem(4, "Sales", Icons.monetization_on_outlined, currentPage == DrawerSections.sales),
-          menuItem(5, "Reports", Icons.report_outlined, currentPage == DrawerSections.reports),
-          Divider(),
-          menuItem(6, "Users", Icons.people_alt_outlined, currentPage == DrawerSections.users),
-          menuItem(7, "Profile", Icons.perm_identity_outlined, currentPage == DrawerSections.profile),
-          Divider(),
-          menuItem(8, "Logout", Icons.logout, currentPage == DrawerSections.logout),
+          _buildMenuItem(DrawerSections.dashboard, "Dashboard", Icons.dashboard_outlined),
+          _buildMenuDivider(),
+          _buildMenuItem(DrawerSections.product, "Product", Icons.shopping_cart_outlined),
+          _buildMenuItem(DrawerSections.inventory, "Inventory", Icons.inventory_outlined),
+          _buildMenuDivider(),
+          _buildMenuItem(DrawerSections.sales, "Sales", Icons.monetization_on_outlined),
+          _buildMenuItem(DrawerSections.reports, "Reports", Icons.report_outlined),
+          _buildMenuDivider(),
+          _buildMenuItem(DrawerSections.users, "Users", Icons.people_alt_outlined),
+          _buildMenuItem(DrawerSections.profile, "Profile", Icons.perm_identity_outlined),
+          _buildMenuDivider(),
+          _buildMenuItem(DrawerSections.logout, "Logout", Icons.logout),
         ],
       ),
     );
   }
 
-  Widget menuItem(int id, String title, IconData icon, bool selected) {
+  Widget _buildMenuItem(DrawerSections section, String title, IconData icon) {
+    final bool isSelected = currentPage == section;
     return Material(
-      color: selected ? Colors.grey[300] : Colors.transparent,
+      color: isSelected ? Colors.grey[300] : Colors.transparent,
       child: InkWell(
         onTap: () {
           Navigator.pop(context);
-          if (id == 8) {
+          if (section == DrawerSections.logout) {
             _showLogoutDialog();
           } else {
             setState(() {
-              switch (id) {
-                case 1:
-                  currentPage = DrawerSections.dashboard;
-                  break;
-                case 2:
-                  currentPage = DrawerSections.product;
-                  break;
-                case 3:
-                  currentPage = DrawerSections.inventory;
-                  break;
-                case 4:
-                  currentPage = DrawerSections.sales;
-                  break;
-                case 5:
-                  currentPage = DrawerSections.reports;
-                  break;
-                case 6:
-                  currentPage = DrawerSections.users;
-                  break;
-                case 7:
-                  currentPage = DrawerSections.profile;
-                  break;
-              }
+              currentPage = section;
             });
           }
         },
@@ -176,21 +150,17 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           padding: EdgeInsets.all(15.0),
           child: Row(
             children: [
-              Expanded(
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: Colors.black,
-                ),
+              Icon(
+                icon,
+                size: 20,
+                color: Colors.black,
               ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                  ),
+              SizedBox(width: 15),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
                 ),
               ),
             ],
@@ -198,6 +168,10 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
         ),
       ),
     );
+  }
+
+  Widget _buildMenuDivider() {
+    return Divider();
   }
 
   void _showLogoutDialog() {
@@ -218,10 +192,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
+              _logout();
             },
             child: Text("Log Out"),
           ),
@@ -230,19 +201,31 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     );
   }
 
-  Widget Footer() {
+  void _logout() {
+    widget.userAll.clear(); // Ensure the clear method is now working correctly
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (route) => false,
+      );
+    });
+  }
+
+  Widget _buildFooter() {
     return Container(
       padding: EdgeInsets.all(15.0),
       color: Colors.grey,
       height: 60,
       width: double.infinity,
-      child: Text(
-        "Admin",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
+      child: Center(
+        child: Text(
+          "Admin",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
       ),
     );

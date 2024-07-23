@@ -16,15 +16,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// ------------- Delete below ----------------------------
-// import 'package:flutter/material.dart';
-// import 'package:piggytech/admin/admin_drawer_list.dart';
-//
-// void main() => runApp(MaterialApp(
-//   debugShowCheckedModeBanner: false,
-//   initialRoute: '/admin',
-//   routes: {
-//     '/admin' : (context) => AdminDrawerList(),
-//   },
-// ));

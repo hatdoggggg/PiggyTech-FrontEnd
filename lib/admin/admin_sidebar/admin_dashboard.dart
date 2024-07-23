@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
-import 'package:piggytech/services/user_all.dart';
 
-import '../../services/product.dart';
+import '/services/user_all.dart';
+import '/services/product.dart';
 
 class AdminDashboardPage extends StatefulWidget {
-  const AdminDashboardPage({super.key});
+  final User_all userAll;
+
+  const AdminDashboardPage({super.key, required this.userAll});
 
   @override
   _AdminDashboardPageState createState() => _AdminDashboardPageState();
@@ -81,7 +83,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             Padding(
               padding: EdgeInsets.only(bottom: 10.0),
               child: Text(
-                "Welcome to Piggytech, Admin Roniel!",
+                "Welcome to Piggytech, Admin ${widget.userAll.username}!",
                 style: TextStyle(fontSize: 20.0),
                 textAlign: TextAlign.center,
               ),
@@ -113,7 +115,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     }
                   },
                 ),
-                _buildSummaryBox("Total Sales", "11,300"),
+                _buildSummaryBox("Total Sales", "0"),
               ],
             ),
             SizedBox(height: 20.0),
@@ -248,10 +250,4 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: AdminDashboardPage(),
-  ));
 }

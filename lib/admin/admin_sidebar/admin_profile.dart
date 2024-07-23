@@ -1,19 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Add this import for date formatting
+
+import '/services/user_all.dart';
 
 class AdminProfilePage extends StatefulWidget {
-  const AdminProfilePage({Key? key}) : super(key: key);
+  final User_all user_all;
+
+  const AdminProfilePage({Key? key, required this.user_all}) : super(key: key);
 
   @override
   _AdminProfilePageState createState() => _AdminProfilePageState();
 }
 
 class _AdminProfilePageState extends State<AdminProfilePage> {
-  String name = 'Vhenus Tumbaga';
-  String address = 'Calaca City';
-  String phoneNumber = '0123456789';
-  String email = 'vt@gmail.com';
-  String password = 'password123';
-  String createdOn = '2024-01-01';
+  late User_all user_all;
+  late TextEditingController _nameController;
+  late TextEditingController _addressController;
+  late TextEditingController _phoneController;
+  late TextEditingController _genderController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _createdAtController;
+
+  @override
+  void initState() {
+    super.initState();
+    user_all = widget.user_all;
+
+    _nameController = TextEditingController(text: user_all.username ?? '');
+    _addressController = TextEditingController(text: user_all.address ?? '');
+    _phoneController = TextEditingController(text: user_all.phone ?? '');
+    _genderController = TextEditingController(text: user_all.gender ?? '');
+    _emailController = TextEditingController(text: user_all.email ?? '');
+    _passwordController = TextEditingController(text: user_all.password ?? '');
+    _createdAtController = TextEditingController(
+      text: user_all.createdAt != null ? DateFormat('yyyy-MM-dd').format(user_all.createdAt!) : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    _genderController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _createdAtController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +62,8 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
             Center(
               child: Column(
                 children: <Widget>[
-                  const CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/profile.jpg'),
+                  CircleAvatar(
+                    backgroundImage: AssetImage(_getProfileImage()),
                     radius: 50.0,
                   ),
                   TextButton(
@@ -58,8 +93,8 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               ),
             ),
             const SizedBox(height: 15.0),
-            buildProfileItem(Icons.person, 'Name', name),
-            const SizedBox(height: 10.0), // Added space
+            buildProfileItem(Icons.person, 'Name:', user_all.username ?? ''),
+            const SizedBox(height: 10.0),
             Divider(
               height: 20.0,
               color: Colors.black,
@@ -73,15 +108,17 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
               ),
             ),
             const SizedBox(height: 15.0),
-            buildProfileItem(Icons.location_city, 'Address', address),
-            const SizedBox(height: 20.0), // Added space
-            buildProfileItem(Icons.phone, 'Phone No', phoneNumber),
-            const SizedBox(height: 20.0), // Added space
-            buildProfileItem(Icons.email, 'Email', email),
-            const SizedBox(height: 20.0), // Added space
-            buildProfileItem(Icons.lock, 'Password', password),
-            const SizedBox(height: 20.0), // Added space
-            buildProfileItem(Icons.date_range, 'Created On', createdOn),
+            buildProfileItem(Icons.location_city, 'Address:', user_all.address ?? ''),
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.phone, 'Phone No:', user_all.phone ?? ''),
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.male, 'Gender:', user_all.gender ?? ''),
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.email, 'Email:', user_all.email ?? ''),
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.lock, 'Password:', '••••••••'), // Masked password
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.date_range, 'Created At:', user_all.createdAt != null ? DateFormat('yyyy-MM-dd').format(user_all.createdAt!) : ''),
           ],
         ),
       ),
@@ -122,46 +159,28 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _buildEditField('Name', name, (String newName) {
-                setState(() {
-                  name = newName;
-                });
-              }),
-              const SizedBox(height: 20.0), // Added space
-              _buildEditField('Address', address, (String newAddress) {
-                setState(() {
-                  address = newAddress;
-                });
-              }),
-              const SizedBox(height: 20.0), // Added space
-              _buildEditField('Phone Number', phoneNumber, (String newPhoneNumber) {
-                setState(() {
-                  phoneNumber = newPhoneNumber;
-                });
-              }),
-              const SizedBox(height: 20.0), // Added space
-              _buildEditField('Email', email, (String newEmail) {
-                setState(() {
-                  email = newEmail;
-                });
-              }),
-              const SizedBox(height: 20.0), // Added space
-              _buildEditField('Password', password, (String newPassword) {
-                setState(() {
-                  password = newPassword;
-                });
-              }),
-              const SizedBox(height: 20.0), // Added space
-              _buildEditField('Created On', createdOn, (String newCreatedOn) {
-                setState(() {
-                  createdOn = newCreatedOn;
-                });
-              }),
-              const SizedBox(height: 20.0),
+              _buildEditField('Name', _nameController),
+              _buildEditField('Address', _addressController),
+              _buildEditField('Phone Number', _phoneController),
+              _buildEditField('Gender', _genderController),
+              _buildEditField('Email', _emailController),
+              _buildEditField('Password', _passwordController, obscureText: true), // Mask password input
+              _buildEditField('Created On', _createdAtController),
+              SizedBox(height: 20.0),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close the modal bottom sheet
+                    if (_validateInputs()) {
+                      setState(() {
+                        user_all.username = _nameController.text;
+                        user_all.address = _addressController.text;
+                        user_all.phone = _phoneController.text;
+                        user_all.email = _emailController.text;
+                        user_all.password = _passwordController.text;
+                        user_all.createdAt = DateTime.tryParse(_createdAtController.text) ?? DateTime.now(); // Parse the date
+                      });
+                      Navigator.pop(context);
+                    }
                   },
                   child: const Text('Save Changes'),
                 ),
@@ -173,9 +192,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
     );
   }
 
-  Widget _buildEditField(String title, String initialValue, Function(String) onChanged) {
-    TextEditingController controller = TextEditingController(text: initialValue);
-
+  Widget _buildEditField(String title, TextEditingController controller, {bool obscureText = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -189,10 +206,30 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         const SizedBox(height: 8.0),
         TextField(
           controller: controller,
-          onChanged: onChanged,
+          obscureText: obscureText, // Mask text if it's a password
+          keyboardType: title == 'Created On' ? TextInputType.datetime : TextInputType.text,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+          ),
         ),
         const SizedBox(height: 16.0),
       ],
     );
+  }
+
+  bool _validateInputs() {
+    // Add your validation logic here
+    // Return true if inputs are valid, false otherwise
+    return true;
+  }
+
+  String _getProfileImage() {
+    if (user_all.gender == 'Male') {
+      return 'assets/images/profile_male.png'; // Image for male users
+    } else if (user_all.gender == 'Female') {
+      return 'assets/images/profile_female.png'; // Image for female users
+    } else {
+      return 'assets/images/profile_default.jpg'; // Default image
+    }
   }
 }

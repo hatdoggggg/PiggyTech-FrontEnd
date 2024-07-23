@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/user.dart';
 import 'admin/admin_drawer_list.dart';
 import 'sales/sales_drawer_list.dart';
+import 'services/user_all.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,44 +24,48 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordVisible = false;
   bool isLoading = false;
 
-  Future<String> _saveCredential(String email, String password) async{
-    try{
+  Future<String> _saveCredential(String email, String password) async {
+    try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', email);
       await prefs.setString('password', password);
-
-      setState(() {
-        email = email;
-        password = password;
-      });
-
       return '';
-    }catch(err){
+    } catch (err) {
+      print('Error saving credentials: $err');
       return err.toString();
     }
   }
 
   Future<Map<String, dynamic>> login(User user) async {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/v1/auth/login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-      body: jsonEncode(<String, dynamic>{
-        'usernameOrEmail': user.email,
-        'password': user.password
-      }),
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to login');
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8080/api/v1/auth/login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: jsonEncode(<String, dynamic>{
+          'usernameOrEmail': user.email,
+          'password': user.password
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to login');
+      }
+    } catch (e) {
+      print('Error during login: $e');
+      throw Exception('Network error or invalid credentials');
     }
   }
 
   void _login() async {
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
+    if (formKey.currentState?.validate() ?? false) {
+      formKey.currentState?.save();
       setState(() {
         isLoading = true;
       });
@@ -73,21 +78,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
       try {
         Map<String, dynamic> loginResponse = await login(user);
+        print('Login response: $loginResponse');
         setState(() {
           isLoading = false;
         });
 
         if (loginResponse.containsKey('roles')) {
           List<dynamic> roles = loginResponse['roles'];
+          String username = loginResponse['username'] ?? '';
+          String address = loginResponse['address'] ?? '';
+          String phone = loginResponse['phone'] ?? '';
+          String gender = loginResponse['gender'] ?? '';
+          DateTime createdAt = DateTime.parse(loginResponse['createdAt'] ?? DateTime.now().toIso8601String());
+
+          User_all userAll = User_all(
+            username: username,
+            email: email,
+            password: password,
+            address: address,
+            phone: phone,
+            gender: gender,
+            createdAt: createdAt,
+          );
+
           if (roles.contains('ROLE_ADMIN')) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => AdminDrawerList()),
+              MaterialPageRoute(
+                builder: (context) => AdminDrawerList(userAll: userAll),
+              ),
             );
           } else if (roles.contains('ROLE_USER')) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => SalesDrawerList()),
+              MaterialPageRoute(
+                builder: (context) => SalesDrawerList(userAll: userAll),
+              ),
             );
           } else {
             showErrorDialog('User role not recognized');
@@ -99,7 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           isLoading = false;
         });
-        showErrorDialog('Incorrect email or password. Please try again');
+        print('Error during login processing: $e');
+        showErrorDialog(e.toString());
       }
     }
   }
@@ -116,30 +143,6 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Login Successful'),
-          content: Text('You have successfully logged in.'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminDrawerList()),
-                );
               },
             ),
           ],
@@ -223,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
               return null;
             },
             onSaved: (value) {
-              email = value!;
+              email = value ?? '';
             },
           ),
           SizedBox(height: 10),
@@ -259,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
               return null;
             },
             onSaved: (value) {
-              password = value!;
+              password = value ?? '';
             },
           ),
           SizedBox(height: 20),
@@ -267,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: isLoading ? null: _login,
+                onPressed: isLoading ? null : _login,
                 child: Text('Login'),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -281,7 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                'Dont have an account?',
+                'Don\'t have an account?',
                 style: TextStyle(
                   color: Colors.black,
                 ),
@@ -295,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                onTap: ()=> Navigator.pushReplacement(
+                onTap: () => Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => SignupScreen()),
                 ),

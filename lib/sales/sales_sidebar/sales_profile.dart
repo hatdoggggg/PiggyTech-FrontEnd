@@ -1,19 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '/services/user_all.dart';
 
 class SalesProfilePage extends StatefulWidget {
-  const SalesProfilePage({Key? key}) : super(key: key);
+  final User_all userAll;
+
+  const SalesProfilePage({Key? key, required this.userAll}) : super(key: key);
 
   @override
   _SalesProfilePageState createState() => _SalesProfilePageState();
 }
 
 class _SalesProfilePageState extends State<SalesProfilePage> {
-  String name = 'Vhenus Tumbaga';
-  String address = 'Calaca City';
-  String phoneNumber = '0123456789';
-  String email = 'vt@gmail.com';
-  String password = 'password123';
-  String createdOn = '2024-01-01';
+  late TextEditingController _nameController;
+  late TextEditingController _addressController;
+  late TextEditingController _phoneController;
+  late TextEditingController _genderController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _createdAtController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nameController = TextEditingController(text: widget.userAll.username ?? '');
+    _addressController = TextEditingController(text: widget.userAll.address ?? '');
+    _phoneController = TextEditingController(text: widget.userAll.phone ?? '');
+    _genderController = TextEditingController(text: widget.userAll.gender ?? '');
+    _emailController = TextEditingController(text: widget.userAll.email ?? '');
+    _passwordController = TextEditingController(text: widget.userAll.password ?? '');
+    _createdAtController = TextEditingController(
+      text: widget.userAll.createdAt != null ? DateFormat('yyyy-MM-dd').format(widget.userAll.createdAt!) : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    _genderController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _createdAtController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +60,8 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
             Center(
               child: Column(
                 children: <Widget>[
-                  const CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/logo.png'),
+                  CircleAvatar(
+                    backgroundImage: AssetImage(_getProfileImage()),
                     radius: 50.0,
                   ),
                   TextButton(
@@ -58,7 +91,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
               ),
             ),
             const SizedBox(height: 15.0),
-            buildProfileItem(Icons.person, 'Name', name),
+            buildProfileItem(Icons.person, 'Name:', widget.userAll.username ?? ''),
             Divider(
               height: 20.0,
               color: Colors.black,
@@ -72,15 +105,17 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
               ),
             ),
             const SizedBox(height: 15.0),
-            buildProfileItem(Icons.location_city, 'Address', address),
+            buildProfileItem(Icons.location_city, 'Address:', widget.userAll.address ?? ''),
             const SizedBox(height: 20.0),
-            buildProfileItem(Icons.phone, 'Phone No', phoneNumber),
+            buildProfileItem(Icons.phone, 'Phone No:', widget.userAll.phone ?? ''),
             const SizedBox(height: 20.0),
-            buildProfileItem(Icons.email, 'Email', email),
+            buildProfileItem(Icons.male, 'Gender:', widget.userAll.gender ?? ''),
             const SizedBox(height: 20.0),
-            buildProfileItem(Icons.lock, 'Password', password),
+            buildProfileItem(Icons.email, 'Email:', widget.userAll.email ?? ''),
             const SizedBox(height: 20.0),
-            buildProfileItem(Icons.date_range, 'Created On', createdOn),
+            buildProfileItem(Icons.lock, 'Password:', '••••••••'),
+            const SizedBox(height: 20.0),
+            buildProfileItem(Icons.date_range, 'Created On:', widget.userAll.createdAt != null ? DateFormat('yyyy-MM-dd').format(widget.userAll.createdAt!) : ''),
             const SizedBox(height: 20.0),
           ],
         ),
@@ -122,41 +157,30 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _buildEditField('Name', name, (String newName) {
-                setState(() {
-                  name = newName;
-                });
-              }),
-              _buildEditField('Address', address, (String newAddress) {
-                setState(() {
-                  address = newAddress;
-                });
-              }),
-              _buildEditField('Phone Number', phoneNumber, (String newPhoneNumber) {
-                setState(() {
-                  phoneNumber = newPhoneNumber;
-                });
-              }),
-              _buildEditField('Email', email, (String newEmail) {
-                setState(() {
-                  email = newEmail;
-                });
-              }),
-              _buildEditField('Password', password, (String newPassword) {
-                setState(() {
-                  password = newPassword;
-                });
-              }),
-              _buildEditField('Created On', createdOn, (String newCreatedOn) {
-                setState(() {
-                  createdOn = newCreatedOn;
-                });
-              }),
+              _buildEditField('Name', _nameController),
+              _buildEditField('Address', _addressController),
+              _buildEditField('Phone Number', _phoneController),
+              _buildEditField('Gender', _genderController),
+              _buildEditField('Email', _emailController),
+              _buildEditField('Password', _passwordController, obscureText: true),
+              _buildEditField('Created On', _createdAtController),
               const SizedBox(height: 20.0),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close the modal bottom sheet
+                    if (_validateInputs()) {
+                      setState(() {
+                        widget.userAll.username = _nameController.text;
+                        widget.userAll.address = _addressController.text;
+                        widget.userAll.phone = _phoneController.text;
+                        widget.userAll.gender = _genderController.text;
+                        widget.userAll.email = _emailController.text;
+                        widget.userAll.password = _passwordController.text;
+                        widget.userAll.createdAt = DateTime.tryParse(
+                            _createdAtController.text) ?? DateTime.now();
+                      });
+                      Navigator.pop(context);
+                    }
                   },
                   child: const Text('Save Changes'),
                 ),
@@ -168,9 +192,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
     );
   }
 
-  Widget _buildEditField(String title, String initialValue, Function(String) onChanged) {
-    TextEditingController controller = TextEditingController(text: initialValue);
-
+  Widget _buildEditField(String title, TextEditingController controller, {bool obscureText = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -184,10 +206,28 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
         const SizedBox(height: 8.0),
         TextField(
           controller: controller,
-          onChanged: onChanged,
+          obscureText: obscureText,
+          keyboardType: title == 'Created On' ? TextInputType.datetime : TextInputType.text,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+          ),
         ),
         const SizedBox(height: 16.0),
       ],
     );
+  }
+
+  bool _validateInputs() {
+    return true;
+  }
+
+  String _getProfileImage() {
+    if (widget.userAll.gender == 'Male') {
+      return 'assets/images/profile_male.png'; // Image for male users
+    } else if (widget.userAll.gender == 'Female') {
+      return 'assets/images/profile_female.png'; // Image for female users
+    } else {
+      return 'assets/images/profile_default.jpg'; // Default image
+    }
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -22,8 +21,6 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   Future<List<User_all>> fetchData() async {
     final response = await http.get(
         Uri.parse('http://10.0.2.2:8080/api/v1/auth/all') // Android
-      // Uri.parse('http://127.0.0.1:8080/api/v1/auth/all')  // Web
-      // Uri.parse('http://---.---.---.---:8080/api/v1/auth/all') // IP Address of laptop
     );
 
     if (response.statusCode == 200) {
@@ -48,13 +45,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         child: Column(
           children: [
             _buildSearchBarWithFunnel(),
-            SizedBox(height: 10.0), // Space between search bar and table
-            _buildProductTable(),
+            SizedBox(height: 10.0),
+            _buildUserTable(),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewProduct,
+        onPressed: _addNewUser,
         child: Icon(Icons.add),
         backgroundColor: Colors.yellow,
       ),
@@ -69,7 +66,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search...',
-              prefixIcon: Icon(Icons.search), // Add the search icon
+              prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
@@ -77,10 +74,9 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                 ),
               ),
               filled: true,
-              fillColor: Colors.grey[200], // Light grey background
+              fillColor: Colors.grey[200],
             ),
             onChanged: (text) {
-              // Handle search query changes here
               print('Search text: $text');
             },
           ),
@@ -95,7 +91,6 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
           child: IconButton(
             icon: Icon(Icons.filter_list),
             onPressed: () {
-              // Handle filter button press here
               print('Filter icon pressed');
             },
           ),
@@ -104,7 +99,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
-  Widget _buildProductTable() {
+  Widget _buildUserTable() {
     return Expanded(
       child: FutureBuilder<List<User_all>>(
         future: user_all,
@@ -137,7 +132,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user.username,
+                            user.username ?? 'Unknown',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20.0,
@@ -145,7 +140,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                             ),
                           ),
                           Text(
-                            user.email,
+                            user.email ?? 'No email',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 15.0,
@@ -175,14 +170,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
-  void _addNewProduct() {
-    // Handle adding a new product here
+  void _addNewUser() {
     print('Add icon pressed');
   }
 
   @override
   void dispose() {
-    _searchController.dispose(); // Dispose of the controller when the widget is disposed
+    _searchController.dispose();
     super.dispose();
   }
 }
