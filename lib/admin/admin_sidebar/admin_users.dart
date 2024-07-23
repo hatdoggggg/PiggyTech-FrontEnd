@@ -125,8 +125,14 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                 itemCount: users.length,
                 itemBuilder: (context, index) {
                   final user = users[index];
+                  String avatarPath = user.gender == 'male'
+                      ? 'assets/images/male.png'
+                      : 'assets/images/female.png';
                   return Card(
                     child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: AssetImage(avatarPath),
+                      ),
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

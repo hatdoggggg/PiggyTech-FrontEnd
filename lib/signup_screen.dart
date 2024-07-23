@@ -22,6 +22,65 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscure = true;
   IconData _obscureIcon = Icons.visibility_off;
 
+  Future<bool> createAccount(User user) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8080/api/v1/auth/register/user'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(<String, dynamic>{
+        'username': user.username,
+        'email': user.email,
+        'password': user.password
+      }),
+    );
+    return response.statusCode == 200;
+  }
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Signup Successful'),
+          content: Text('You have successfully signed up. Proceed to fill in your information.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserDetailScreen(email: email)),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Signup Failed'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,6 +152,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         if (value.length < 2) {
                           return 'Email should be at least 60 letters long';
                         }
+                        if (!value.contains('@')) {
+                          return 'Email should contain an @ symbol';
+                        }
                         return null;
                       },
                       onSaved: (value) {
@@ -146,11 +208,21 @@ class _SignupScreenState extends State<SignupScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                             Navigator.pushReplacement(
-                                 context,
-                              MaterialPageRoute(builder: (context) => UserDetailScreen()),
-                             );
+                          onPressed: () async {
+                            if(formKey.currentState!.validate()){
+                              formKey.currentState!.save();
+                              User user = User(
+                                  username : username,
+                                  email: email,
+                                  password : password
+                              );
+                              bool success = await createAccount(user);
+                              if(success) {
+                                showSuccessDialog();
+                              } else {
+                                showErrorDialog('Your account is already exists. Please try again.');
+                              }
+                            }
                           },
                           child: Text('Sign Up'),
                           style: ElevatedButton.styleFrom(
