@@ -1,24 +1,37 @@
 class User_all {
-  final String username;
-  final String email;
-  final String address;
-  final String phone;
-  final String gender;
-  final DateTime createdAt;
+  String? username;
+  String? email;
+  String? password;
+  String? address;
+  String? phone;
+  String? gender;
+  DateTime? createdAt;
 
   User_all({
-    required this.username,
-    required this.email,
-    required this.address,
-    required this.phone,
-    required this.gender,
-    required this.createdAt,
+    this.username,
+    this.email,
+    this.password,
+    this.address,
+    this.phone,
+    this.gender,
+    this.createdAt,
   });
+
+  void clear() {
+    username = null;
+    email = null;
+    password = null;
+    address = null;
+    phone = null;
+    gender = null;
+    createdAt = null;
+  }
 
   factory User_all.fromJson(Map<String, dynamic> json) {
     return User_all(
       username: json['username'] ?? '',
       email: json['email'] ?? '',
+      password: json['password'] ?? '',
       address: json['address'] ?? '',
       phone: json['phone'] ?? '',
       gender: json['gender'] ?? '',

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '/../admin/admin_drawer_list.dart';
-import '../../../services/inventory.dart';
+import '/admin/admin_drawer_list.dart';
+import '/services/inventory.dart';
 
 class SelectedInventory extends StatefulWidget {
   final Inventory inventory;
@@ -36,114 +35,74 @@ class _SelectedInventoryState extends State<SelectedInventory> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AdminDrawerList(initialPage: DrawerSections.inventory),
-              ),
-            );
+            Navigator.pop(context); // Go back to the previous screen
           },
         ),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Column(
-              children: [
-                SizedBox(height: 50.0,),
-                Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Name:',
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2.0,
-                                ),
-                              ),
-                              SizedBox(width: 10.0,),
-                              Text(
-                                inventory.productName,
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
-                              Text(
-                                'Received Date:',
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 10.0,),
-                              Text(
-                                '${inventory.receivedDate.toLocal()}'.split(' ')[0],
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
-                              Text(
-                                'Expiration Date:',
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 10.0,),
-                              Text(
-                                '${inventory.expirationDate.toLocal()}'.split(' ')[0],
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10.0,),
-                          Row(
-                            children: [
-                              Text(
-                                'Quantity:',
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 10.0,),
-                              Text(
-                                inventory.quantity.toString(),
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 20.0), // Space before the details
+            Text(
+              'Name:',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+              ),
             ),
-          ),
-        ],
+            Text(
+              inventory.productName,
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Received Date:',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '${inventory.receivedDate.toLocal()}'.split(' ')[0],
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Expiration Date:',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '${inventory.expirationDate.toLocal()}'.split(' ')[0],
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Text(
+              'Quantity:',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              inventory.quantity.toString(),
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

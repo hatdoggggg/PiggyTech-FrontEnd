@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '/../admin/admin_drawer_list.dart';
-import '/../services/user_all.dart'; // Update the import to point to your user model
+import '/services/user_all.dart'; // Update the import to point to your user model
 
 class SelectedUsers extends StatelessWidget {
   final User_all user_all;
@@ -12,7 +11,7 @@ class SelectedUsers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Determine the image to display based on gender
-    String imagePath = user_all.gender == 'male'
+    String imagePath = user_all.gender?.toLowerCase() == 'male'
         ? 'assets/images/male.png'
         : 'assets/images/female.png';
 
@@ -30,12 +29,7 @@ class SelectedUsers extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AdminDrawerList(initialPage: DrawerSections.users),
-              ),
-            );
+            Navigator.pop(context); // Use pop to go back to previous screen
           },
         ),
       ),
@@ -53,92 +47,42 @@ class SelectedUsers extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20.0),
-            Row(
-              children: [
-                Text(
-                  'Name:',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  user_all.username,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
-            ),
+            _buildUserInfoRow('Name:', user_all.username ?? 'N/A'),
             SizedBox(height: 10.0),
-            Row(
-              children: [
-                Text(
-                  'Email:',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  user_all.email,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
-            ),
+            _buildUserInfoRow('Email:', user_all.email ?? 'N/A'),
             SizedBox(height: 10.0),
-            Row(
-              children: [
-                Text(
-                  'Address:',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  user_all.address,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
-            ),
+            _buildUserInfoRow('Address:', user_all.address ?? 'N/A'),
             SizedBox(height: 10.0),
-            Row(
-              children: [
-                Text(
-                  'Phone:',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  user_all.phone,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
-            ),
+            _buildUserInfoRow('Phone:', user_all.phone ?? 'N/A'),
             SizedBox(height: 10.0),
-            Row(
-              children: [
-                Text(
-                  'Gender:',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  user_all.gender,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
-            ),
+            _buildUserInfoRow('Gender:', user_all.gender ?? 'N/A'),
             SizedBox(height: 10.0),
-            Row(
-              children: [
-                Text(
-                  'Created At:',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  DateFormat('yyyy-MM-dd').format(user_all.createdAt),
-                  style: TextStyle(fontSize: 20.0),
-                ),
-              ],
+            _buildUserInfoRow(
+              'Created At:',
+              DateFormat('yyyy-MM-dd').format(user_all.createdAt ?? DateTime.now()),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildUserInfoRow(String label, String value) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(width: 10.0),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(fontSize: 20.0),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

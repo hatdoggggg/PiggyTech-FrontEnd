@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import '/services/user_all.dart';
 
 class SalesDrawerHeader extends StatefulWidget {
+  final User_all userAll;
+
+  const SalesDrawerHeader({Key? key, required this.userAll}) : super(key: key);
+
   @override
   _SalesDrawerHeaderState createState() => _SalesDrawerHeaderState();
 }
@@ -16,36 +21,37 @@ class _SalesDrawerHeaderState extends State<SalesDrawerHeader> {
         ),
       ),
       height: 200,
-      padding: EdgeInsets.only(top: 40.0),
+      padding: const EdgeInsets.only(top: 40.0),
       child: Row(
         children: [
           Padding(
-            padding: EdgeInsets.only(left: 20.0), // Add padding to the left
+            padding: const EdgeInsets.only(left: 20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start, // Align items to the start (left)
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.only(bottom: 20),
+                  margin: const EdgeInsets.only(bottom: 20),
                   height: 70,
                   width: 70,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: AssetImage('assets/images/profile.jpg'),
+                      image: AssetImage(_getProfileImage()),
+                      fit: BoxFit.cover, // Ensure the image fits within the circle
                     ),
                   ),
                 ),
                 Text(
-                  "Vhenus Tumbaga",
-                  style: TextStyle(
+                  widget.userAll.username ?? 'Username not available', // Handle null username
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
                 ),
                 Text(
-                  "vt@gmail.com",
-                  style: TextStyle(
+                  widget.userAll.email ?? 'Email not available', // Handle null email
+                  style: const TextStyle(
                     fontSize: 14,
                   ),
                 ),
@@ -55,5 +61,15 @@ class _SalesDrawerHeaderState extends State<SalesDrawerHeader> {
         ],
       ),
     );
+  }
+
+  String _getProfileImage() {
+    if (widget.userAll.gender == 'Male') {
+      return 'assets/images/profile_male.png'; // Image for male users
+    } else if (widget.userAll.gender == 'Female') {
+      return 'assets/images/profile_female.png'; // Image for female users
+    } else {
+      return 'assets/images/profile_default.jpg'; // Default image
+    }
   }
 }

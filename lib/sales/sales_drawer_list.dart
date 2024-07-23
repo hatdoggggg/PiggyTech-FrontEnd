@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '/services/user_all.dart';
 import 'sales_sidebar/pos.dart';
 import 'sales_sidebar/sales_dashboard.dart';
 import 'sales_sidebar/history.dart';
 import 'sales_sidebar/sales_profile.dart';
 import 'sales_drawer_header.dart';
-
 import '/login_screen.dart';
 
 enum DrawerSections {
@@ -17,6 +17,10 @@ enum DrawerSections {
 }
 
 class SalesDrawerList extends StatefulWidget {
+  final User_all userAll;
+
+  SalesDrawerList({required this.userAll});
+
   @override
   _SalesDrawerListState createState() => _SalesDrawerListState();
 }
@@ -24,10 +28,9 @@ class SalesDrawerList extends StatefulWidget {
 class _SalesDrawerListState extends State<SalesDrawerList> {
   var currentPage = DrawerSections.dashboard;
 
-  // Map to store titles for each section
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
-    DrawerSections.pos: "Pos",
+    DrawerSections.pos: "POS",
     DrawerSections.history: "History",
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
@@ -38,7 +41,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
     Widget container;
     switch (currentPage) {
       case DrawerSections.dashboard:
-        container = SalesDashboardPage();
+        container = SalesDashboardPage(userAll: widget.userAll);
         break;
       case DrawerSections.pos:
         container = PosPage();
@@ -47,7 +50,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
         container = HistoryPage();
         break;
       case DrawerSections.profile:
-        container = SalesProfilePage();
+        container = SalesProfilePage(userAll: widget.userAll);
         break;
       case DrawerSections.logout:
         container = LoginScreen();
@@ -58,7 +61,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
       appBar: AppBar(
         backgroundColor: Colors.yellow,
         title: Text(
-          sectionTitles[currentPage] ?? "PiggyTech", // Default to "PiggyTech" if not found
+          sectionTitles[currentPage] ?? "PiggyTech",
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -68,17 +71,17 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
       drawer: Drawer(
         child: SingleChildScrollView(
           child: Container(
-            height: MediaQuery.of(context).size.height, // Ensure full screen height
+            height: MediaQuery.of(context).size.height,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   children: [
-                    SalesDrawerHeader(),
-                    MyDrawerList(),
+                    SalesDrawerHeader(userAll: widget.userAll),
+                    _buildDrawerList(),
                   ],
                 ),
-                Footer(),
+                _buildFooter(),
               ],
             ),
           ),
@@ -87,56 +90,37 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
     );
   }
 
-  Widget MyDrawerList() {
+  Widget _buildDrawerList() {
     return Container(
-      padding: EdgeInsets.only(
-        top: 15,
-      ),
+      padding: EdgeInsets.only(top: 15),
       child: Column(
         children: [
-          menuItem(1, "Dashboard", Icons.dashboard_outlined,
-              currentPage == DrawerSections.dashboard),
+          _buildMenuItem(DrawerSections.dashboard, "Dashboard", Icons.dashboard_outlined),
           Divider(),
-          menuItem(2, "Pos", Icons.countertops_outlined,
-              currentPage == DrawerSections.pos),
+          _buildMenuItem(DrawerSections.pos, "POS", Icons.countertops_outlined),
           Divider(),
-          menuItem(3, "History", Icons.countertops_outlined,
-              currentPage == DrawerSections.history),
+          _buildMenuItem(DrawerSections.history, "History", Icons.history_outlined),
           Divider(),
-          menuItem(4, "Profile", Icons.perm_identity_outlined,
-              currentPage == DrawerSections.profile),
+          _buildMenuItem(DrawerSections.profile, "Profile", Icons.perm_identity_outlined),
           Divider(),
-          menuItem(5, "Logout", Icons.logout,
-              currentPage == DrawerSections.logout),
+          _buildMenuItem(DrawerSections.logout, "Logout", Icons.logout),
         ],
       ),
     );
   }
 
-  Widget menuItem(int id, String title, IconData icon, bool selected) {
+  Widget _buildMenuItem(DrawerSections section, String title, IconData icon) {
+    final bool isSelected = currentPage == section;
     return Material(
-      color: selected ? Colors.grey[300] : Colors.transparent,
+      color: isSelected ? Colors.grey[300] : Colors.transparent,
       child: InkWell(
         onTap: () {
           Navigator.pop(context);
-          if (id == 5) {
+          if (section == DrawerSections.logout) {
             _showLogoutDialog();
           } else {
             setState(() {
-              switch (id) {
-                case 1:
-                  currentPage = DrawerSections.dashboard;
-                  break;
-                case 2:
-                  currentPage = DrawerSections.pos;
-                  break;
-                case 3:
-                  currentPage = DrawerSections.history;
-                  break;
-                case 4:
-                  currentPage = DrawerSections.profile;
-                  break;
-              }
+              currentPage = section;
             });
           }
         },
@@ -144,21 +128,17 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
           padding: EdgeInsets.all(15.0),
           child: Row(
             children: [
-              Expanded(
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: Colors.black,
-                ),
+              Icon(
+                icon,
+                size: 20,
+                color: Colors.black,
               ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                  ),
+              SizedBox(width: 15),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
                 ),
               ),
             ],
@@ -179,17 +159,14 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Close the dialog
             },
             child: Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
+              Navigator.of(context).pop(); // Close the dialog
+              _logout();
             },
             child: Text("Log Out"),
           ),
@@ -198,19 +175,32 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
     );
   }
 
-  Widget Footer() {
+  void _logout() {
+    // Perform any necessary cleanup actions
+    widget.userAll.clear(); // Ensure the clear method is working
+
+    // Navigate to the login screen and remove all previous routes
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false,
+    );
+  }
+
+  Widget _buildFooter() {
     return Container(
       padding: EdgeInsets.all(15.0),
       color: Colors.grey,
       height: 60,
       width: double.infinity,
-      child: Text(
-        "Cashier",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
+      child: Center(
+        child: Text(
+          "Cashier",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
       ),
     );

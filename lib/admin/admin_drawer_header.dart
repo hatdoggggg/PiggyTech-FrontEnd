@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '/services/user_all.dart';
+
 class AdminDrawerHeader extends StatefulWidget {
+  final User_all userAll;
+
+  const AdminDrawerHeader({Key? key, required this.userAll}) : super(key: key);
+
   @override
   _AdminDrawerHeaderState createState() => _AdminDrawerHeaderState();
 }
@@ -32,19 +38,19 @@ class _AdminDrawerHeaderState extends State<AdminDrawerHeader> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: AssetImage('assets/images/profile.jpg'),
+                      image: AssetImage(_getProfileImage()),
                     ),
                   ),
                 ),
                 Text(
-                  "Roniel Madrigal",
+                  widget.userAll.username ?? 'Guest', // Provide a default value
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
                   ),
                 ),
                 Text(
-                  "rm@gmail.com",
+                  widget.userAll.email ?? 'No email', // Provide a default value
                   style: TextStyle(
                     fontSize: 14,
                   ),
@@ -55,5 +61,15 @@ class _AdminDrawerHeaderState extends State<AdminDrawerHeader> {
         ],
       ),
     );
+  }
+
+  String _getProfileImage() {
+    if (widget.userAll.gender == 'Male') {
+      return 'assets/images/profile_male.png'; // Image for male users
+    } else if (widget.userAll.gender == 'Female') {
+      return 'assets/images/profile_female.png'; // Image for female users
+    } else {
+      return 'assets/images/profile_default.jpg'; // Default image
+    }
   }
 }

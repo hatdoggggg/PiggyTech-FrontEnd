@@ -7,10 +7,12 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../services/product.dart';
 import 'admin_product/add_product.dart';
 import 'admin_product/selectedProduct.dart';
-
+import '../../services/user_all.dart'; // Import the User_all class
 
 class AdminProductPage extends StatefulWidget {
-  const AdminProductPage({super.key});
+  final User_all userAll; // Add this field to receive the User_all object
+
+  const AdminProductPage({super.key, required this.userAll});
 
   @override
   _AdminProductPageState createState() => _AdminProductPageState();
@@ -19,8 +21,7 @@ class AdminProductPage extends StatefulWidget {
 class _AdminProductPageState extends State<AdminProductPage> {
   final TextEditingController _searchController = TextEditingController();
   List<Product> filteredProducts = []; // Initialize filteredProducts as a List<Product>
-
-  late Future<List<Product>> products; // Update products type to Future<List<Product>>
+  late Future<List<Product>> products;
 
   Future<List<Product>> fetchData([String query = '']) async {
     final response = await http.get(
@@ -34,12 +35,12 @@ class _AdminProductPageState extends State<AdminProductPage> {
   @override
   void initState() {
     super.initState();
+    products = fetchData();
     _searchController.addListener(() {
       setState(() {
         products = fetchData(_searchController.text);
       });
     });
-    products = fetchData();
   }
 
   // Function to sort products alphabetically by name
@@ -99,10 +100,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
           ),
           child: IconButton(
             icon: Icon(Icons.sort),
-            onPressed: () {
-              // Call sorting function here
-              sortProductsAlphabetically();
-            },
+            onPressed: sortProductsAlphabetically, // Call sorting function here
           ),
         ),
       ],
@@ -160,7 +158,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
                         ],
                       ),
                       onTap: () {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => SelectedProduct(product: filteredProducts[index]),
@@ -184,7 +182,9 @@ class _AdminProductPageState extends State<AdminProductPage> {
   void _addNewProduct() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddProduct()),
+      MaterialPageRoute(
+        builder: (context) => AddProduct(userAll: widget.userAll), // Pass the User_all object here
+      ),
     );
   }
 
