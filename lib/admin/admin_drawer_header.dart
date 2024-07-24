@@ -64,12 +64,12 @@ class _AdminDrawerHeaderState extends State<AdminDrawerHeader> {
   }
 
   String _getProfileImage() {
-    if (widget.userAll.gender == 'Male') {
-      return 'assets/images/profile_male.png'; // Image for male users
-    } else if (widget.userAll.gender == 'Female') {
-      return 'assets/images/profile_female.png'; // Image for female users
+    if (widget.userAll.gender == 'male') {
+      return 'assets/images/male.png'; // Image for male users
+    } else if (widget.userAll.gender == 'female') {
+      return 'assets/images/female.png'; // Image for female users
     } else {
-      return 'assets/images/profile_default.jpg'; // Default image
+      return 'assets/images/profile.jpg'; // Default image
     }
   }
 }

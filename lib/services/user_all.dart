@@ -6,6 +6,7 @@ class User_all {
   String? phone;
   String? gender;
   DateTime? createdAt;
+  List<String>? roles;
 
   User_all({
     this.username,
@@ -15,6 +16,7 @@ class User_all {
     this.phone,
     this.gender,
     this.createdAt,
+    this.roles,
   });
 
   void clear() {
@@ -25,6 +27,7 @@ class User_all {
     phone = null;
     gender = null;
     createdAt = null;
+    roles = null;
   }
 
   factory User_all.fromJson(Map<String, dynamic> json) {
@@ -36,6 +39,7 @@ class User_all {
       phone: json['phone'] ?? '',
       gender: json['gender'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      roles: List<String>.from(json['roles'] ?? []),
     );
   }
 }
