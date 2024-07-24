@@ -29,7 +29,7 @@ class SelectedUsers extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context); // Use pop to go back to previous screen
+            Navigator.pop(context);
           },
         ),
       ),
@@ -45,6 +45,12 @@ class SelectedUsers extends StatelessWidget {
                 width: 100.0,
                 height: 100.0,
               ),
+            ),
+            // Add a divider below the image
+            Divider(
+              height: 40,
+              color: Colors.black,
+              thickness: 2.0,
             ),
             SizedBox(height: 20.0),
             _buildUserInfoRow('Name:', user_all.username ?? 'N/A'),
@@ -68,21 +74,29 @@ class SelectedUsers extends StatelessWidget {
   }
 
   Widget _buildUserInfoRow(String label, String value) {
-    return Row(
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(width: 10.0),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(fontSize: 20.0),
-            overflow: TextOverflow.ellipsis,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 1.0),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.only(bottom: 10.0),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
           ),
-        ),
-      ],
+          SizedBox(width: 10.0),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 20.0),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
