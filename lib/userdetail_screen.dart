@@ -1,7 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import 'services/userdetail.dart';
 import 'login_screen.dart';
 
 class UserDetailScreen extends StatefulWidget {
+  final String email;
+
+  UserDetailScreen({required this.email});
+
   @override
   State<UserDetailScreen> createState() => _UserDetailScreenState();
 }
@@ -12,6 +21,66 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   String phoneNumber = '';
   String address = '';
   String gender = '';
+
+  Future<bool> accountDetail(UserDetail userDetail) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8080/api/v1/userdetail/new'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(<String, dynamic>{
+        'email' : userDetail.email,
+        'phone' : userDetail.phone,
+        'address' : userDetail.address,
+        'gender' : userDetail.gender
+      }),
+    );
+    return response.statusCode == 200;
+  }
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Signup Successful'),
+          content: Text('You have successfully completed the signup process. You can now login.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Signup Failed'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +94,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             children: <Widget>[
               SizedBox(height: 130.0),
               Text(
-                'Fill your Information!',
+                'Fill in your Information!',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2.0,
@@ -53,6 +122,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please provide a phone number';
+                        }
+                        if (value.length < 11) {
+                          return 'Phone number should be at least 11 numbers';
                         }
                         return null;
                       },
@@ -175,11 +247,22 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => LoginScreen()),
-                            );
+                          onPressed: () async {
+                            if(formKey.currentState!.validate()){
+                              formKey.currentState!.save();
+                              UserDetail userDetail = UserDetail(
+                                  email: widget.email,
+                                  phone: phoneNumber,
+                                  address: address,
+                                  gender: gender
+                              );
+                              bool success = await accountDetail(userDetail);
+                              if(success){
+                                showSuccessDialog();
+                              } else {
+                                showErrorDialog('Please try again.');
+                              }
+                            }
                           },
                           child: Text('Okay'),
                           style: ElevatedButton.styleFrom(
