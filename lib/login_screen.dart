@@ -48,18 +48,13 @@ class _LoginScreenState extends State<LoginScreen> {
           'password': user.password
         }),
       );
-
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
         throw Exception('Failed to login');
       }
     } catch (e) {
-      print('Error during login: $e');
-      throw Exception('Network error or invalid credentials');
+      throw Exception('Incorrect email or password. Please try again.');
     }
   }
 

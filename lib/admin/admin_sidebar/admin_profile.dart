@@ -224,12 +224,12 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   }
 
   String _getProfileImage() {
-    if (user_all.gender == 'Male') {
-      return 'assets/images/profile_male.png'; // Image for male users
-    } else if (user_all.gender == 'Female') {
-      return 'assets/images/profile_female.png'; // Image for female users
+    if (user_all.gender == 'male') {
+      return 'assets/images/male.png'; // Image for male users
+    } else if (user_all.gender == 'female') {
+      return 'assets/images/female.png'; // Image for female users
     } else {
-      return 'assets/images/profile_default.jpg'; // Default image
+      return 'assets/images/profile.jpg'; // Default image
     }
   }
 }
