@@ -8,9 +8,9 @@ import '/admin/admin_drawer_list.dart';
 import '/services/product.dart';
 
 class AddInventory extends StatefulWidget {
-  final User_all userAll; // Add this parameter
+  final User_all userAll;
 
-  const AddInventory({super.key, required this.userAll}); // Update constructor
+  const AddInventory({super.key, required this.userAll});
 
   @override
   State<AddInventory> createState() => _AddInventoryState();
@@ -18,12 +18,17 @@ class AddInventory extends StatefulWidget {
 
 class _AddInventoryState extends State<AddInventory> {
   final formKey = GlobalKey<FormState>();
+  final TextEditingController receivedDateController = TextEditingController();
+  final TextEditingController expirationDateController = TextEditingController();
+
   String productName = '';
   double price = 0.0;
   int stock = 0;
   int sold = 0;
-  String photo = 'https://cdn.vectorstock.com/i/1000v/09/60/piggy-vector-2900960.jpg'; // Default photo URL
-
+  String photo = 'https://cdn.vectorstock.com/i/1000v/09/60/piggy-vector-2900960.jpg';
+  DateTime? receivedDate;
+  DateTime? expirationDate;
+  int quantity = 0;
 
   void showSuccessDialog() {
     showDialog(
@@ -36,13 +41,13 @@ class _AddInventoryState extends State<AddInventory> {
             TextButton(
               child: Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminDrawerList(
                       initialPage: DrawerSections.product,
-                      userAll: widget.userAll, // Pass the userAll object here
+                      userAll: widget.userAll,
                     ),
                   ),
                 );
@@ -74,13 +79,33 @@ class _AddInventoryState extends State<AddInventory> {
     );
   }
 
+  Future<void> selectDate(BuildContext context, {required bool isReceivedDate}) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isReceivedDate) {
+          receivedDate = picked;
+          receivedDateController.text = receivedDate!.toLocal().toString().split(' ')[0];
+        } else {
+          expirationDate = picked;
+          expirationDateController.text = expirationDate!.toLocal().toString().split(' ')[0];
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          'Add Products',
+          'Add Inventory',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -94,7 +119,7 @@ class _AddInventoryState extends State<AddInventory> {
           child: ListView(
             children: [
               Text(
-                'Insert product details here.',
+                'Provide the details for Inventory.',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -126,8 +151,8 @@ class _AddInventoryState extends State<AddInventory> {
               TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText: 'Price',
-                  prefixIcon: Icon(Icons.attach_money),
+                  labelText: 'Quantity',
+                  prefixIcon: Icon(Icons.numbers),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20.0),
                     borderSide: BorderSide.none,
@@ -137,13 +162,45 @@ class _AddInventoryState extends State<AddInventory> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please provide a price';
+                    return 'Please provide a quantity';
                   }
                   return null;
                 },
                 onSaved: (value) {
-                  price = double.tryParse(value!) ?? 0.0;
+                  quantity = int.tryParse(value!) ?? 0;
                 },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: receivedDateController,
+                decoration: InputDecoration(
+                  labelText: 'Received Date',
+                  prefixIcon: Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                  filled: true,
+                ),
+                readOnly: true,
+                onTap: () => selectDate(context, isReceivedDate: true),
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: expirationDateController,
+                decoration: InputDecoration(
+                  labelText: 'Expiration Date',
+                  prefixIcon: Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                  filled: true,
+                ),
+                readOnly: true,
+                onTap: () => selectDate(context, isReceivedDate: false),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -151,7 +208,12 @@ class _AddInventoryState extends State<AddInventory> {
                   backgroundColor: Colors.yellow,
                   foregroundColor: Colors.black,
                 ),
-                onPressed: ()  {
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    formKey.currentState!.save();
+                    // Handle form submission here, e.g., send data to the server
+                    showSuccessDialog();
+                  }
                 },
                 child: Text('Add Inventory'),
               ),
