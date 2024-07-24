@@ -8,10 +8,13 @@ import 'package:intl/intl.dart'; // Import for DateFormat
 import '../../services/inventory.dart';
 import 'admin_inventory/add_inventory.dart';
 import 'admin_inventory/selectedInventory.dart';
+import '../../services/user_all.dart';
 
 
 class AdminInventoryPage extends StatefulWidget {
-  const AdminInventoryPage({super.key});
+  final User_all userAll;
+
+  const AdminInventoryPage({super.key, required this.userAll});
 
   @override
   _AdminInventoryPageState createState() => _AdminInventoryPageState();
@@ -51,7 +54,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewProduct,
+        onPressed: _addNewInventory,
         child: Icon(Icons.add),
         backgroundColor: Colors.yellow,
       ),
