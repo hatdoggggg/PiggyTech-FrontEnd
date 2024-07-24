@@ -63,7 +63,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
         container = AdminProductPage(userAll: widget.userAll);
         break;
       case DrawerSections.inventory:
-        container = AdminInventoryPage();
+        container = AdminInventoryPage(userAll: widget.userAll);
         break;
       case DrawerSections.sales:
         container = AdminSalesPage();

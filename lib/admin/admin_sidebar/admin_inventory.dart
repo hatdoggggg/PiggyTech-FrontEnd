@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart'; // Import for DateFormat
 
 import '../../services/inventory.dart';
+import 'admin_inventory/add_inventory.dart';
 import 'admin_inventory/selectedInventory.dart';
 
 
@@ -162,9 +163,13 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
     );
   }
 
-  void _addNewProduct() {
-    // Handle adding a new product here
-    print('Add icon pressed');
+  void _addNewInventory() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddInventory(userAll: widget.userAll), // Pass the User_all object here
+      ),
+    );
   }
 
   @override
