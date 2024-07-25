@@ -51,6 +51,7 @@ class _SalesProfilePageState extends State<SalesProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white70,
       body: Padding(
         padding: const EdgeInsets.all(20.0),

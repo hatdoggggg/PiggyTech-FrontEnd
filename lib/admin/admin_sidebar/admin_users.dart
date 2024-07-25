@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../services/user_all.dart';
+import '/admin/admin_sidebar/admin_users/add_admin.dart';
+import '/services/user_all.dart';
 import 'admin_users/selectedUsers.dart';
 
 class AdminUsersPage extends StatefulWidget {
-  const AdminUsersPage({super.key});
+  final User_all userAll;
+
+  const AdminUsersPage({super.key, required this.userAll});
 
   @override
   _AdminUsersPageState createState() => _AdminUsersPageState();
@@ -15,26 +18,31 @@ class AdminUsersPage extends StatefulWidget {
 
 class _AdminUsersPageState extends State<AdminUsersPage> {
   final TextEditingController _searchController = TextEditingController();
-
   late Future<List<User_all>> user_all;
-
-  Future<List<User_all>> fetchData() async {
-    final response = await http.get(
-        Uri.parse('http://10.0.2.2:8080/api/v1/auth/all') // Android
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body) as List<dynamic>;
-      return data.map((json) => User_all.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load data');
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     user_all = fetchData();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  Future<List<User_all>> fetchData([String query = '']) async {
+    final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/auth/all?search=$query')
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => User_all.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load users');
+    }
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      user_all = fetchData(_searchController.text);
+    });
   }
 
   @override
@@ -51,7 +59,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewUser,
+        onPressed: _addNewAdmin,
         child: Icon(Icons.add),
         backgroundColor: Colors.yellow,
       ),
@@ -76,25 +84,9 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
               filled: true,
               fillColor: Colors.grey[200],
             ),
-            onChanged: (text) {
-              print('Search text: $text');
-            },
           ),
         ),
         SizedBox(width: 10.0),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            color: Colors.grey[200],
-            border: Border.all(color: Colors.yellow),
-          ),
-          child: IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: () {
-              print('Filter icon pressed');
-            },
-          ),
-        ),
       ],
     );
   }
@@ -112,54 +104,76 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
               ),
             );
           }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
           if (snapshot.hasData) {
-            List<User_all> users = snapshot.data!;
-            return Padding(
-              padding: EdgeInsets.all(3.0),
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  final user = users[index];
-                  String avatarPath = user.gender == 'male'
-                      ? 'assets/images/male.png'
-                      : 'assets/images/female.png';
-                  return Card(
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: AssetImage(avatarPath),
-                      ),
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user.username ?? 'Unknown',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            user.email ?? 'No email',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SelectedUsers(user_all: user),
-                          ),
-                        );
-                      },
+            final users = snapshot.data!;
+            return ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final user = users[index];
+                String avatarPath = user.gender == 'male'
+                    ? 'assets/images/male.png'
+                    : 'assets/images/female.png';
+                return Card(
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: AssetImage(avatarPath),
                     ),
-                  );
-                },
-              ),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              user.username ?? 'Unknown',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 20.0,),
+                            Text(
+                              '-',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15.0,
+                              ),
+                            ),
+                            SizedBox(width: 20.0,),
+                            Text(
+                              user.roles?.join(', ') ?? 'Unknown Role',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 15.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          user.email ?? 'No email',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SelectedUsers(user_all: user),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             );
           }
           return Center(
@@ -170,8 +184,13 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
-  void _addNewUser() {
-    print('Add icon pressed');
+  void _addNewAdmin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddAdmin(userAll: widget.userAll),
+      ),
+    );
   }
 
   @override

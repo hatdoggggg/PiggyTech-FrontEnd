@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '/admin/admin_drawer_list.dart';
+
 import '/services/inventory.dart';
 
 class SelectedInventory extends StatefulWidget {
   final Inventory inventory;
+
   const SelectedInventory({super.key, required this.inventory});
 
   @override

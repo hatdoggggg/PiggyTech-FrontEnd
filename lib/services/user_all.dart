@@ -39,7 +39,9 @@ class User_all {
       phone: json['phone'] ?? '',
       gender: json['gender'] ?? '',
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      roles: List<String>.from(json['roles'] ?? []),
+      roles: (json['roles'] as List<dynamic>?)
+          ?.map((role) => role.toString().replaceFirst('ROLE_', ''))
+          .toList(),
     );
   }
 }

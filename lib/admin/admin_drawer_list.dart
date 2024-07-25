@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '/services/user_all.dart';
 import 'admin_sidebar/admin_dashboard.dart';
 import 'admin_sidebar/admin_product.dart';
@@ -72,10 +71,10 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
         container = AdminReportsPage();
         break;
       case DrawerSections.users:
-        container = AdminUsersPage();
+        container = AdminUsersPage(userAll: widget.userAll);
         break;
       case DrawerSections.profile:
-        container = AdminProfilePage(user_all: widget.userAll);
+        container = AdminProfilePage(userAll: widget.userAll);
         break;
       case DrawerSections.logout:
         container = LoginScreen();
@@ -147,20 +146,16 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           }
         },
         child: Padding(
-          padding: EdgeInsets.all(15.0),
+          padding: const EdgeInsets.all(15.0),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: Colors.black,
-              ),
-              SizedBox(width: 15),
+              Icon(icon, size: 20, color: Colors.black),
+              SizedBox(width: 20),
               Text(
                 title,
                 style: TextStyle(
-                  color: Colors.black,
                   fontSize: 16,
+                  color: Colors.black,
                 ),
               ),
             ],
@@ -171,45 +166,10 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
   }
 
   Widget _buildMenuDivider() {
-    return Divider();
-  }
-
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Text("Are you sure you want to logout?"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _logout();
-            },
-            child: Text("Log Out"),
-          ),
-        ],
-      ),
+    return Divider(
+      color: Colors.grey,
+      thickness: 1,
     );
-  }
-
-  void _logout() {
-    widget.userAll.clear(); // Ensure the clear method is now working correctly
-
-    Future.delayed(Duration(milliseconds: 100), () {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-            (route) => false,
-      );
-    });
   }
 
   Widget _buildFooter() {
@@ -227,6 +187,33 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
             fontSize: 20,
           ),
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Logout'),
+        content: Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
+            },
+            child: Text('Logout'),
+          ),
+        ],
       ),
     );
   }

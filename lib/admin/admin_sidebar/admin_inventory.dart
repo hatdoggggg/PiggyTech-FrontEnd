@@ -119,41 +119,66 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
           }
           if (snapshot.hasData) {
             final inventories = snapshot.data!;
+
+            // Group inventories by receivedDate
+            final Map<DateTime, List<Inventory>> groupedInventories = {};
+            for (var inventory in inventories) {
+              final date = DateFormat('yyyy-MM-dd').parse(DateFormat('yyyy-MM-dd').format(inventory.receivedDate));
+              if (groupedInventories[date] == null) {
+                groupedInventories[date] = [];
+              }
+              groupedInventories[date]!.add(inventory);
+            }
+
+            // Sort dates
+            final sortedDates = groupedInventories.keys.toList()..sort((a, b) => b.compareTo(a));
+
             return ListView.builder(
-              itemCount: inventories.length,
-              itemBuilder: (context, index) {
-                final inventory = inventories[index];
-                return Card(
-                  child: ListTile(
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          inventory.productName,
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                          ),
+              itemCount: sortedDates.length,
+              itemBuilder: (context, dateIndex) {
+                final date = sortedDates[dateIndex];
+                final inventoriesForDate = groupedInventories[date]!;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        DateFormat('yyyy-MM-dd').format(date),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Text(
-                          'Received Date: ${DateFormat('yyyy-MM-dd').format(inventory.receivedDate)}',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15.0,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SelectedInventory(inventory: inventories[index]),
+                    ...inventoriesForDate.map((inventory) {
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 4.0),
+                        child: ListTile(
+                          title: Text(
+                            inventory.productName,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18.0,
+                            ),
+                          ),
+                          trailing: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SelectedInventory(inventory: inventory),
+                                ),
+                              );
+                            },
+                            child: Text('Details'),
+                          ),
                         ),
                       );
-                    },
-                  ),
+                    }).toList(),
+                  ],
                 );
               },
             );
@@ -165,6 +190,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
       ),
     );
   }
+
 
   void _addNewInventory() {
     Navigator.push(

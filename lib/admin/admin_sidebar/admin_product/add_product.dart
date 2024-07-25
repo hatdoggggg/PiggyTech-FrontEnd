@@ -38,10 +38,6 @@ class _AddProductState extends State<AddProduct> {
         'photo' : product.photo
       }),
     );
-
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
     return response.statusCode == 200;
   }
 

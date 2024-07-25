@@ -67,6 +67,8 @@ class SelectedUsers extends StatelessWidget {
               'Created At:',
               DateFormat('yyyy-MM-dd').format(user_all.createdAt ?? DateTime.now()),
             ),
+            _buildUserInfoRow('Role:', user_all.roles?.join(', ') ?? 'N/A'),
+            SizedBox(height: 10.0),
           ],
         ),
       ),

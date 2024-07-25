@@ -41,17 +41,17 @@ class _SelectedProductState extends State<SelectedProduct> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Center(
-                child: Image.network(
-                  product.photo,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
+            // Use AspectRatio to maintain the image aspect ratio and control the size
+            AspectRatio(
+              aspectRatio: 1.0, // Adjust the aspect ratio as needed
+              child: Image.network(
+                product.photo,
+                fit: BoxFit.cover,
+                width: double.infinity,
               ),
             ),
             SizedBox(height: 20.0),

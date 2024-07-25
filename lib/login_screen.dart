@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'services/user.dart';
 import 'admin/admin_drawer_list.dart';
@@ -23,18 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
   bool isPasswordVisible = false;
   bool isLoading = false;
-
-  Future<String> _saveCredential(String email, String password) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('email', email);
-      await prefs.setString('password', password);
-      return '';
-    } catch (err) {
-      print('Error saving credentials: $err');
-      return err.toString();
-    }
-  }
 
   Future<Map<String, dynamic>> login(User user) async {
     try {
