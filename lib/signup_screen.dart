@@ -149,11 +149,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Please provide an email';
                         }
-                        if (value.length < 2) {
-                          return 'Email should be at least 60 letters long';
-                        }
                         if (!value.contains('@')) {
                           return 'Email should contain an @ symbol';
+                        }
+                        if (!value.endsWith('.com')) {
+                          return 'Email should end with .com';
                         }
                         return null;
                       },

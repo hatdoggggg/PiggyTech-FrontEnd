@@ -4,9 +4,9 @@ import 'package:intl/intl.dart'; // Add this import for date formatting
 import '/services/user_all.dart';
 
 class AdminProfilePage extends StatefulWidget {
-  final User_all user_all;
+  final User_all userAll;
 
-  const AdminProfilePage({Key? key, required this.user_all}) : super(key: key);
+  const AdminProfilePage({super.key, required this.userAll});
 
   @override
   _AdminProfilePageState createState() => _AdminProfilePageState();
@@ -25,7 +25,7 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   @override
   void initState() {
     super.initState();
-    user_all = widget.user_all;
+    user_all = widget.userAll;
 
     _nameController = TextEditingController(text: user_all.username ?? '');
     _addressController = TextEditingController(text: user_all.address ?? '');

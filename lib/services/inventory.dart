@@ -1,12 +1,10 @@
 class Inventory {
-  int id;
   DateTime receivedDate;
   DateTime expirationDate;
   int quantity;
   String productName;
 
   Inventory({
-    required this.id,
     required this.receivedDate,
     required this.expirationDate,
     required this.quantity,
@@ -16,7 +14,6 @@ class Inventory {
   factory Inventory.fromJson(Map<String, dynamic> json) {
     try {
       return Inventory(
-        id: json['id'] ?? 0, // Default to 0 if null
         receivedDate: DateTime.parse(json['receivedDate']),
         expirationDate: DateTime.parse(json['expirationDate']),
         quantity: json['quantity'] ?? 0, // Default to 0 if null

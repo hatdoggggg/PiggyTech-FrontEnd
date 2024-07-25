@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:piggytech/services/inventory.dart';
 
 import '/services/user_all.dart';
 import '/admin/admin_drawer_list.dart';
-import '/services/product.dart';
+import '/services/inventory.dart';
 
 class AddInventory extends StatefulWidget {
   final User_all userAll;
@@ -22,13 +23,25 @@ class _AddInventoryState extends State<AddInventory> {
   final TextEditingController expirationDateController = TextEditingController();
 
   String productName = '';
-  double price = 0.0;
-  int stock = 0;
-  int sold = 0;
-  String photo = 'https://cdn.vectorstock.com/i/1000v/09/60/piggy-vector-2900960.jpg';
   DateTime? receivedDate;
   DateTime? expirationDate;
   int quantity = 0;
+
+  Future<bool> createInventory(Inventory inventory) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8080/api/v1/inventoty/new'), // Correct URL
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'productName' : inventory.productName,
+        'receivedDate' : inventory.receivedDate,
+        'expirationDate' : inventory.expirationDate,
+        'quantity' : inventory.quantity,
+      }),
+    );
+    return response.statusCode == 200;
+  }
 
   void showSuccessDialog() {
     showDialog(
@@ -46,7 +59,7 @@ class _AddInventoryState extends State<AddInventory> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AdminDrawerList(
-                      initialPage: DrawerSections.product,
+                      initialPage: DrawerSections.inventory,
                       userAll: widget.userAll,
                     ),
                   ),
