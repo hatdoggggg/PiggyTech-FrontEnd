@@ -1,15 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart'; // Import for DateFormat
+import 'package:intl/intl.dart';
 
 import '../../services/inventory.dart';
 import 'admin_inventory/add_inventory.dart';
 import 'admin_inventory/selectedInventory.dart';
 import '../../services/user_all.dart';
-
 
 class AdminInventoryPage extends StatefulWidget {
   final User_all userAll;
@@ -24,11 +22,18 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
   TextEditingController _searchController = TextEditingController();
   late Future<List<Inventory>> inventories;
 
-  Future<List<Inventory>> fetchData() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/inventory/all'));
+  Future<List<Inventory>> fetchData([String query = '']) async {
+    // Construct the URL with the search query
+    String url = 'http://10.0.2.2:8080/api/v1/inventory/all';
+    if (query.isNotEmpty) {
+      url += '?search=$query'; // Append the search parameter
+    }
+
+    final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Inventory.fromJson(json)).toList();
+      return data.map((item) => Inventory.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load inventory');
     }
@@ -38,6 +43,13 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
   void initState() {
     super.initState();
     inventories = fetchData();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      inventories = fetchData(_searchController.text);
+    });
   }
 
   @override
@@ -49,7 +61,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
           children: [
             _buildSearchBarWithFunnel(),
             SizedBox(height: 20.0),
-            _buildProductTable(), // Add this line to show the product table
+            _buildProductTable(),
           ],
         ),
       ),
@@ -106,7 +118,6 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
           if (snapshot.hasData) {
             final inventories = snapshot.data!;
 
-            // Group inventories by receivedDate
             final Map<DateTime, List<Inventory>> groupedInventories = {};
             for (var inventory in inventories) {
               final date = DateFormat('yyyy-MM-dd').parse(DateFormat('yyyy-MM-dd').format(inventory.receivedDate));
@@ -116,7 +127,6 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
               groupedInventories[date]!.add(inventory);
             }
 
-            // Sort dates
             final sortedDates = groupedInventories.keys.toList()..sort((a, b) => b.compareTo(a));
 
             return ListView.builder(
@@ -177,12 +187,11 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
     );
   }
 
-
   void _addNewInventory() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddInventory(userAll: widget.userAll), // Pass the User_all object here
+        builder: (context) => AddInventory(userAll: widget.userAll),
       ),
     );
   }
