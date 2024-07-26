@@ -2,21 +2,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import '/services/pos_product.dart'; // Ensure you import PosProduct
+import '/services/product.dart';
 import '/services/user_all.dart';
 import 'checkout_page.dart';
 
 class PosPage extends StatefulWidget {
   final User_all userAll;
 
-  const PosPage({super.key, required this.userAll});
+  const PosPage({Key? key, required this.userAll}) : super(key: key);
 
   @override
   State<PosPage> createState() => _PosPageState();
 }
 
 class _PosPageState extends State<PosPage> {
-  late Future<List<PosProduct>> products;
+  late Future<List<Product>> products;
   final Map<String, int> _cart = {};
   final Map<String, double> _productPrices = {};
 
@@ -26,14 +26,14 @@ class _PosPageState extends State<PosPage> {
     products = fetchData();
   }
 
-  Future<List<PosProduct>> fetchData() async {
+  Future<List<Product>> fetchData() async {
     final response = await http.get(
       Uri.parse('http://10.0.2.2:8080/api/v1/product/all'), // Android
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as List;
-      final productList = data.map((json) => PosProduct.fromJson(json)).toList();
+      final productList = data.map((json) => Product.fromJson(json)).toList();
 
       // Store product prices in the map for easy access
       for (var product in productList) {
@@ -46,13 +46,13 @@ class _PosPageState extends State<PosPage> {
     }
   }
 
-  void _addToCart(PosProduct product) {
+  void _addToCart(Product product) {
     setState(() {
       _cart[product.productName] = (_cart[product.productName] ?? 0) + 1;
     });
   }
 
-  void _removeFromCart(PosProduct product) {
+  void _removeFromCart(Product product) {
     setState(() {
       if (_cart[product.productName] != null) {
         if (_cart[product.productName]! > 1) {
@@ -79,7 +79,7 @@ class _PosPageState extends State<PosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<PosProduct>>(
+      body: FutureBuilder<List<Product>>(
         future: products,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,7 +112,7 @@ class _PosPageState extends State<PosPage> {
               ),
               Divider(),
               _buildCartSummary(),
-              _buildCartList(),
+              _buildCartList(_products), // Pass the product list here
               _buildCheckoutButton(context, _products),
             ],
           );
@@ -140,7 +140,7 @@ class _PosPageState extends State<PosPage> {
     );
   }
 
-  Widget _buildCartList() {
+  Widget _buildCartList(List<Product> _products) {
     return Container(
       height: 200.0, // Fixed height for the cart list
       child: ListView.builder(
@@ -150,26 +150,17 @@ class _PosPageState extends State<PosPage> {
           final productName = cartItem.key;
           final quantity = cartItem.value;
 
+          // Find the original product object from the list
+          final originalProduct = _products.firstWhere((p) => p.productName == productName);
+
           return CartItem(
-            product: PosProduct(
-              productName: productName,
-              price: _productPrices[productName]!,
-              photo: '', // Provide a placeholder or default photo if needed
-            ),
+            product: originalProduct, // Pass the original product directly
             quantity: quantity,
             onAdd: () {
-              _addToCart(PosProduct(
-                productName: productName,
-                price: _productPrices[productName]!,
-                photo: '',
-              ));
+              _addToCart(originalProduct); // Use the original product object
             },
             onRemove: () {
-              _removeFromCart(PosProduct(
-                productName: productName,
-                price: _productPrices[productName]!,
-                photo: '',
-              ));
+              _removeFromCart(originalProduct); // Use the original product object
             },
           );
         },
@@ -177,7 +168,7 @@ class _PosPageState extends State<PosPage> {
     );
   }
 
-  Widget _buildCheckoutButton(BuildContext context, List<PosProduct> _products) {
+  Widget _buildCheckoutButton(BuildContext context, List<Product> _products) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -211,9 +202,8 @@ class _PosPageState extends State<PosPage> {
 }
 
 class ProductCard extends StatelessWidget {
-  final PosProduct product;
-
-  const ProductCard({super.key, required this.product});
+  final Product product;
+  const ProductCard({Key? key, required this.product}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -231,13 +221,8 @@ class ProductCard extends StatelessWidget {
               radius: 30, // Adjusted radius for a smaller image
               backgroundImage: NetworkImage(product.photo),
               onBackgroundImageError: (error, stackTrace) {
-                // Show a placeholder image if the image loading fails
-                // Example placeholder
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.grey,
-                  child: Icon(Icons.image, color: Colors.white),
-                );
+                // You can show a placeholder image if the image loading fails
+                // Use a placeholder image URL or asset
               },
             ),
             SizedBox(width: 16.0), // Spacing between image and text
@@ -272,7 +257,7 @@ class ProductCard extends StatelessWidget {
 }
 
 class CartItem extends StatelessWidget {
-  final PosProduct product; // Change to PosProduct
+  final Product product;
   final int quantity;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
