@@ -6,7 +6,7 @@ import '/services/user_all.dart';
 class SalesProfilePage extends StatefulWidget {
   final User_all userAll;
 
-  const SalesProfilePage({Key? key, required this.userAll}) : super(key: key);
+  const SalesProfilePage({super.key, required this.userAll});
 
   @override
   _SalesProfilePageState createState() => _SalesProfilePageState();

@@ -1,12 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:piggytech/services/inventory.dart';
 
+import '/../services/product.dart';
 import '/services/user_all.dart';
 import '/admin/admin_drawer_list.dart';
-import '/services/inventory.dart';
 
 class AddInventory extends StatefulWidget {
   final User_all userAll;
@@ -26,21 +25,49 @@ class _AddInventoryState extends State<AddInventory> {
   DateTime? receivedDate;
   DateTime? expirationDate;
   int quantity = 0;
+  Product? selectedProduct;
+  List<Product> products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts().then((productList) {
+      setState(() {
+        products = productList;
+      });
+    });
+  }
+
+  Future<List<Product>> fetchProducts([String query = '']) async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/product/all?search=$query'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List;
+      return data.map((item) => Product.fromJson(item)).toList();
+    } else {
+      print('Failed to load products: ${response.statusCode}');
+      throw Exception('Failed to load products');
+    }
+  }
 
   Future<bool> createInventory(Inventory inventory) async {
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8080/api/v1/inventoty/new'), // Correct URL
+      Uri.parse('http://10.0.2.2:8080/api/v1/inventory/new'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, dynamic>{
-        'productName' : inventory.productName,
-        'receivedDate' : inventory.receivedDate,
-        'expirationDate' : inventory.expirationDate,
-        'quantity' : inventory.quantity,
+        'productName': inventory.productName,
+        'receivedDate': inventory.receivedDate.toIso8601String(),
+        'expirationDate': inventory.expirationDate.toIso8601String(),
+        'quantity': inventory.quantity,
       }),
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      print('Failed to create inventory: ${response.statusCode} - ${response.body}');
+      return false;
+    }
   }
 
   void showSuccessDialog() {
@@ -49,7 +76,7 @@ class _AddInventoryState extends State<AddInventory> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Success'),
-          content: Text('Product added successfully!'),
+          content: Text('Inventory added successfully!'),
           actions: <Widget>[
             TextButton(
               child: Text('OK'),
@@ -139,7 +166,7 @@ class _AddInventoryState extends State<AddInventory> {
                 ),
               ),
               SizedBox(height: 20),
-              TextFormField(
+              DropdownButtonFormField<Product>(
                 decoration: InputDecoration(
                   labelText: 'Product Name',
                   prefixIcon: Icon(Icons.add),
@@ -150,14 +177,23 @@ class _AddInventoryState extends State<AddInventory> {
                   fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
                   filled: true,
                 ),
+                items: products.map((Product product) {
+                  return DropdownMenuItem<Product>(
+                    value: product,
+                    child: Text(product.productName),
+                  );
+                }).toList(),
+                onChanged: (Product? value) {
+                  setState(() {
+                    selectedProduct = value;
+                    productName = value?.productName ?? '';
+                  });
+                },
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please provide a product name';
+                  if (value == null) {
+                    return 'Please select a product';
                   }
                   return null;
-                },
-                onSaved: (value) {
-                  productName = value!;
                 },
               ),
               SizedBox(height: 20),
@@ -198,6 +234,12 @@ class _AddInventoryState extends State<AddInventory> {
                 ),
                 readOnly: true,
                 onTap: () => selectDate(context, isReceivedDate: true),
+                validator: (value) {
+                  if (receivedDate == null) {
+                    return 'Please select a received date';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -214,6 +256,14 @@ class _AddInventoryState extends State<AddInventory> {
                 ),
                 readOnly: true,
                 onTap: () => selectDate(context, isReceivedDate: false),
+                validator: (value) {
+                  if (expirationDate == null) {
+                    return 'Please select an expiration date';
+                  } else if (receivedDate != null && expirationDate!.isBefore(receivedDate!)) {
+                    return 'Expiration date must be after the received date';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -224,8 +274,19 @@ class _AddInventoryState extends State<AddInventory> {
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
                     formKey.currentState!.save();
-                    // Handle form submission here, e.g., send data to the server
-                    showSuccessDialog();
+                    final newInventory = Inventory(
+                      productName: selectedProduct!.productName,
+                      receivedDate: receivedDate!,
+                      expirationDate: expirationDate!,
+                      quantity: quantity,
+                    );
+                    createInventory(newInventory).then((success) {
+                      if (success) {
+                        showSuccessDialog();
+                      } else {
+                        showErrorDialog('Failed to add inventory.');
+                      }
+                    });
                   }
                 },
                 child: Text('Add Inventory'),

@@ -86,7 +86,6 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             ),
           ),
         ),
-        SizedBox(width: 10.0),
       ],
     );
   }

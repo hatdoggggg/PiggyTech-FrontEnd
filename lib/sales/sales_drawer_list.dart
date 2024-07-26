@@ -17,16 +17,17 @@ enum DrawerSections {
 }
 
 class SalesDrawerList extends StatefulWidget {
+  final DrawerSections initialPage;
   final User_all userAll;
 
-  SalesDrawerList({required this.userAll});
+  SalesDrawerList({required this.userAll, this.initialPage = DrawerSections.dashboard}); // Make sure to accept initialPage
 
   @override
   _SalesDrawerListState createState() => _SalesDrawerListState();
 }
 
 class _SalesDrawerListState extends State<SalesDrawerList> {
-  var currentPage = DrawerSections.dashboard;
+  late DrawerSections currentPage; // Use late keyword to initialize later
 
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
@@ -37,6 +38,12 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    currentPage = widget.initialPage; // Set the initial page
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget container;
     switch (currentPage) {
@@ -44,10 +51,10 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
         container = SalesDashboardPage(userAll: widget.userAll);
         break;
       case DrawerSections.pos:
-        container = PosPage();
+        container = PosPage(userAll: widget.userAll);
         break;
       case DrawerSections.history:
-        container = HistoryPage();
+        container = HistoryPage(userAll: widget.userAll);
         break;
       case DrawerSections.profile:
         container = SalesProfilePage(userAll: widget.userAll);

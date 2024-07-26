@@ -172,25 +172,6 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     );
   }
 
-  Widget _buildFooter() {
-    return Container(
-      padding: EdgeInsets.all(15.0),
-      color: Colors.grey,
-      height: 60,
-      width: double.infinity,
-      child: Center(
-        child: Text(
-          "Admin",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showLogoutDialog() {
     showDialog(
       context: context,
@@ -206,14 +187,42 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
+              _logout();
             },
             child: Text('Logout'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _logout() {
+    // Perform any necessary cleanup actions
+    widget.userAll.clear(); // Ensure the clear method is working
+
+    // Navigate to the login screen and remove all previous routes
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false,
+    );
+  }
+
+  Widget _buildFooter() {
+    return Container(
+      padding: EdgeInsets.all(15.0),
+      color: Colors.grey,
+      height: 60,
+      width: double.infinity,
+      child: Center(
+        child: Text(
+          "Admin",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
       ),
     );
   }
