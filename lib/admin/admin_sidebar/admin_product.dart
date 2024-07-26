@@ -161,7 +161,20 @@ class _AdminProductPageState extends State<AdminProductPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SelectedProduct(product: filteredProducts[index]),
+                            builder: (context) => SelectedProduct(
+                              product: filteredProducts[index],
+                              onProductDeleted: (Product deletedProduct) {
+                                // Remove the deleted product from the list
+                                setState(() {
+                                  filteredProducts.remove(deletedProduct);
+                                });
+                              },
+                              onProductUpdated: (Product updatedProduct) { // Add this line
+                                setState(() {
+                                  filteredProducts[index] = updatedProduct; // Update the product in the list
+                                });
+                              },
+                            ),
                           ),
                         );
                       },
@@ -178,6 +191,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
       ),
     );
   }
+
 
   void _addNewProduct() {
     Navigator.push(

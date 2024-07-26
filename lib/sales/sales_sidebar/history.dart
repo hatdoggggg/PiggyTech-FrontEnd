@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '/services/user_all.dart';
+
 class Item {
   final String name;
   final int quantity;
@@ -27,7 +29,9 @@ class Transaction {
 }
 
 class HistoryPage extends StatefulWidget {
-  const HistoryPage({super.key});
+  final User_all userAll;
+
+  const HistoryPage({super.key, required this.userAll});
 
   @override
   _HistoryPageState createState() => _HistoryPageState();
@@ -143,10 +147,4 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: HistoryPage(),
-  ));
 }

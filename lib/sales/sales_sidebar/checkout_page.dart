@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
-import 'history.dart';
+
+import '../sales_drawer_list.dart';
+import '/services/product.dart';
+import '/services/user_all.dart'; // Import the User_all service
 
 class CheckoutPage extends StatelessWidget {
   final Map<String, int> cart;
-  final List<Map<String, dynamic>> products;
-  const CheckoutPage({Key? key, required this.cart, required this.products}) : super(key: key);
+  final List<Product> products;
+  final User_all userAll; // Added User_all reference
+
+  const CheckoutPage({
+    Key? key,
+    required this.cart,
+    required this.products,
+    required this.userAll, // Accept userAll in the constructor
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double totalPrice = 0.0;
+
+    // Calculate total price using the Product class
     cart.forEach((key, value) {
-      final product = products.firstWhere((element) => element['name'] == key);
-      totalPrice += product['price'] * value;
+      final product = products.firstWhere((element) => element.productName == key);
+      totalPrice += product.price * value;
     });
 
     return Scaffold(
@@ -31,10 +43,10 @@ class CheckoutPage extends StatelessWidget {
               itemCount: cart.length,
               itemBuilder: (context, index) {
                 final cartItem = cart.entries.toList()[index];
-                final product = products.firstWhere((element) => element['name'] == cartItem.key);
+                final product = products.firstWhere((element) => element.productName == cartItem.key);
                 return ListTile(
-                  title: Text('${product['name']} x${cartItem.value}'),
-                  trailing: Text('₱${(product['price'] * cartItem.value).toStringAsFixed(2)}'),
+                  title: Text('${product.productName} x${cartItem.value}'),
+                  trailing: Text('₱${(product.price * cartItem.value).toStringAsFixed(2)}'),
                 );
               },
             ),
@@ -63,17 +75,20 @@ class CheckoutPage extends StatelessWidget {
                           actions: [
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
+                                Navigator.of(context).pop(); // Close the dialog
                               },
                               child: Text('No'),
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop();
+                                Navigator.of(context).pop(); // Close the dialog
+                                // Navigate to AdminDrawerList with the required parameters
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => HistoryPage()),
+                                  MaterialPageRoute(builder: (context) => SalesDrawerList(
+                                    initialPage: DrawerSections.history,
+                                    userAll: userAll, // Pass the userAll reference
+                                  )),
                                 );
                               },
                               child: Text('Yes'),
