@@ -1,100 +1,135 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Import the http package
+import 'package:http/http.dart' as http;
 import '../../services/order.dart';
 import '../../services/order_item.dart';
 import '../sales_drawer_list.dart';
 import '/services/product.dart';
-import '/services/user_all.dart'; // Import the User_all service
+import '/services/user_all.dart';
 
-class CheckoutPage extends StatelessWidget {
+class CheckoutPage extends StatefulWidget {
   final Map<String, int> cart;
   final List<Product> products;
-  final User_all userAll; // Added User_all reference
+  final User_all userAll;
 
   const CheckoutPage({
     Key? key,
     required this.cart,
     required this.products,
-    required this.userAll, // Accept userAll in the constructor
+    required this.userAll,
   }) : super(key: key);
 
-  Future<void> submitOrder(BuildContext context) async {
-    double totalPrice = 0.0;
-    List<OrderItem> orderItems = [];
+  @override
+  _CheckoutPageState createState() => _CheckoutPageState();
+}
 
-    // Prepare the order items and calculate total price
-    cart.forEach((key, value) {
-      final product = products.firstWhere((element) => element.productName == key);
-      totalPrice += product.price * value;
-
-      // Create the order item with the correct parameters
-      orderItems.add(OrderItem(
-        quantity: value,
-        price: product.price,
-        productId: product.id, // Assuming product has an id property
-        orderId: null, // This will be set later
-      ));
-    });
-
-    // Create the order object
-    final order = Order(
-      totalAmount: totalPrice,
-      orderDate: DateTime.now(),
-      email: userAll.email ?? 'unknown@example.com',
-    );
-
+class _CheckoutPageState extends State<CheckoutPage> {
+  Future<int?> submitOrder(Order order) async {
     try {
-      // Send the order to the backend
       final orderResponse = await http.post(
         Uri.parse('http://10.0.2.2:8080/api/v1/order/new'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(order.toJson()),
       );
 
-      if (orderResponse.statusCode == 200 || orderResponse.statusCode == 201) {
-        final orderId = json.decode(orderResponse.body)['id']; // Get the order ID
-
-        // Send the order items to the backend
-        for (var item in orderItems) {
-          item.orderId = orderId; // Set the order ID for each item
-          final itemResponse = await http.post(
-            Uri.parse('http://10.0.2.2:8080/api/v1/orderitem/new'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(item.toJson()), // Sending the order item JSON
-          );
-
-          if (itemResponse.statusCode == 200 || itemResponse.statusCode == 201) {
-            print('Order item successfully sent to API. Response: ${itemResponse.body}');
-          } else {
-            print('Failed to send order item. Status code: ${itemResponse.statusCode}');
-            print('Response body: ${itemResponse.body}'); // Log the response body for debugging
-          }
-        }
-
-        // Navigate to the SalesDrawerList
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SalesDrawerList(
-              initialPage: DrawerSections.history,
-              userAll: userAll,
-            ),
-          ),
-        );
+      if (orderResponse.statusCode == 201) {
+        return json.decode(orderResponse.body)['id'];
       } else {
         print('Failed to submit order. Status code: ${orderResponse.statusCode}');
-        // Show error message
+        return null;
+      }
+    } catch (error) {
+      print('Error submitting order: $error');
+      return null;
+    }
+  }
+
+  Future<bool> submitOrderItem(OrderItem item) async {
+    try {
+      final itemResponse = await http.post(
+        Uri.parse('http://10.0.2.2:8080/api/v1/orderitem/new'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(item.toJson()),
+      );
+
+      if (itemResponse.statusCode == 201) {
+        print('Order item successfully sent to API. Response: ${itemResponse.body}');
+        return true;
+      } else {
+        print('Failed to send order item. Status code: ${itemResponse.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error submitting order item: $error');
+      return false;
+    }
+  }
+
+  Future<void> processOrder(BuildContext context) async {
+    double totalPrice = 0.0;
+    List<OrderItem> orderItems = [];
+
+    for (var entry in widget.cart.entries) {
+      final product = widget.products.firstWhere(
+            (element) => element.productName == entry.key,
+        orElse: () => throw Exception('Product not found'),
+      );
+
+      totalPrice += product.price * entry.value;
+
+      orderItems.add(OrderItem(
+        id: 0,
+        quantity: entry.value,
+        price: product.price,
+        productId: product.id,
+        orderId: 0,
+        productName: '', // Placeholder; will be updated after the order is created
+      ));
+    }
+
+    final order = Order(
+      id: 0,
+      totalAmount: totalPrice,
+      orderDate: DateTime.now(),
+      email: widget.userAll.email ?? 'unknown@example.com',
+    );
+
+    final orderId = await submitOrder(order);
+
+    if (orderId != null) {
+      bool allItemsSubmitted = true;
+
+      for (var item in orderItems) {
+        item.orderId = orderId; // Set the order ID for each item
+        if (!await submitOrderItem(item)) {
+          allItemsSubmitted = false;
+          break;
+        }
+      }
+
+      if (mounted) {
+        if (allItemsSubmitted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SalesDrawerList(
+                initialPage: DrawerSections.history,
+                userAll: widget.userAll,
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to submit all order items. Please try again.')),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to submit order. Please try again.')),
         );
       }
-    } catch (error) {
-      print('Error submitting order: $error');
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred. Please try again.')),
-      );
     }
   }
 
@@ -102,9 +137,8 @@ class CheckoutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     double totalPrice = 0.0;
 
-    // Calculate total price using the Product class
-    cart.forEach((key, value) {
-      final product = products.firstWhere((element) => element.productName == key);
+    widget.cart.forEach((key, value) {
+      final product = widget.products.firstWhere((element) => element.productName == key);
       totalPrice += product.price * value;
     });
 
@@ -122,10 +156,10 @@ class CheckoutPage extends StatelessWidget {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: cart.length,
+              itemCount: widget.cart.length,
               itemBuilder: (context, index) {
-                final cartItem = cart.entries.toList()[index];
-                final product = products.firstWhere((element) => element.productName == cartItem.key);
+                final cartItem = widget.cart.entries.toList()[index];
+                final product = widget.products.firstWhere((element) => element.productName == cartItem.key);
                 return ListTile(
                   title: Text('${product.productName} x${cartItem.value}'),
                   trailing: Text('₱${(product.price * cartItem.value).toStringAsFixed(2)}'),
@@ -164,7 +198,7 @@ class CheckoutPage extends StatelessWidget {
                             TextButton(
                               onPressed: () async {
                                 Navigator.of(context).pop(); // Close the dialog
-                                await submitOrder(context); // Submit the order
+                                await processOrder(context); // Submit the order
                               },
                               child: Text('Yes'),
                             ),

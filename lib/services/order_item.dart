@@ -1,20 +1,41 @@
 class OrderItem {
-  int quantity;
-  double price;
-  int productId; // Add productId
-  int? orderId; // Use camelCase for Dart convention
+  final int id; // Ensure this field exists
+  final int quantity;
+  final double price;
+  final int productId;
+  int orderId;
+  final String productName; // Ensure this field is defined
 
   OrderItem({
+    required this.id,
     required this.quantity,
     required this.price,
-    required this.productId, // Require productId
-    this.orderId,
+    required this.productId,
+    required this.orderId,
+    required this.productName, // Ensure this field is included in the constructor
   });
 
-  Map<String, dynamic> toJson() => {
-    'quantity': quantity,
-    'price': price,
-    'productId': productId, // Include productId
-    'order_id': orderId, // Include order ID, using snake_case
-  };
+  // fromJson method to parse JSON data into an OrderItem instance
+  factory OrderItem.fromJson(Map<String, dynamic> json) {
+    return OrderItem(
+      id: json['id'],
+      quantity: json['quantity'],
+      price: json['price'],
+      productId: json['productId'],
+      orderId: json['orderId'],
+      productName: json['productName'], // Ensure this matches the JSON structure
+    );
+  }
+
+  // toJson method to convert an OrderItem instance to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'quantity': quantity,
+      'price': price,
+      'productId': productId,
+      'orderId': orderId,
+      'productName': productName, // Include productName in JSON
+    };
+  }
 }
