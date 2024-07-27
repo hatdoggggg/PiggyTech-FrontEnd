@@ -10,7 +10,7 @@ import '/login_screen.dart';
 
 enum DrawerSections {
   dashboard,
-  // pos,
+  pos,
   history,
   profile,
   logout,
@@ -31,7 +31,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
 
   final Map<DrawerSections, String> sectionTitles = {
     DrawerSections.dashboard: "Dashboard",
-    // DrawerSections.pos: "POS",
+    DrawerSections.pos: "POS",
     DrawerSections.history: "History",
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
@@ -50,9 +50,9 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
       case DrawerSections.dashboard:
         container = SalesDashboardPage(userAll: widget.userAll);
         break;
-      // case DrawerSections.pos:
-        // container = PosPage(userAll: widget.userAll);
-        // break;
+      case DrawerSections.pos:
+        container = PosPage(userAll: widget.userAll);
+        break;
       case DrawerSections.history:
         container = HistoryPage(userAll: widget.userAll);
         break;
@@ -104,7 +104,7 @@ class _SalesDrawerListState extends State<SalesDrawerList> {
         children: [
           _buildMenuItem(DrawerSections.dashboard, "Dashboard", Icons.dashboard_outlined),
           Divider(),
-          // _buildMenuItem(DrawerSections.pos, "POS", Icons.countertops_outlined),
+          _buildMenuItem(DrawerSections.pos, "POS", Icons.countertops_outlined),
           Divider(),
           _buildMenuItem(DrawerSections.history, "History", Icons.history_outlined),
           Divider(),

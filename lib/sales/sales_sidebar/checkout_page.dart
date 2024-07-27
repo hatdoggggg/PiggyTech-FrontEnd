@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http; // Import the http package
+import '../../services/order.dart';
+import '../../services/order_item.dart';
 import '../sales_drawer_list.dart';
 import '/services/product.dart';
 import '/services/user_all.dart'; // Import the User_all service
@@ -15,6 +18,85 @@ class CheckoutPage extends StatelessWidget {
     required this.products,
     required this.userAll, // Accept userAll in the constructor
   }) : super(key: key);
+
+  Future<void> submitOrder(BuildContext context) async {
+    double totalPrice = 0.0;
+    List<OrderItem> orderItems = [];
+
+    // Prepare the order items and calculate total price
+    cart.forEach((key, value) {
+      final product = products.firstWhere((element) => element.productName == key);
+      totalPrice += product.price * value;
+
+      // Create the order item with the correct parameters
+      orderItems.add(OrderItem(
+        quantity: value,
+        price: product.price,
+        productId: product.id, // Assuming product has an id property
+        orderId: null, // This will be set later
+      ));
+    });
+
+    // Create the order object
+    final order = Order(
+      totalAmount: totalPrice,
+      orderDate: DateTime.now(),
+      email: userAll.email ?? 'unknown@example.com',
+    );
+
+    try {
+      // Send the order to the backend
+      final orderResponse = await http.post(
+        Uri.parse('http://10.0.2.2:8080/api/v1/order/new'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(order.toJson()),
+      );
+
+      if (orderResponse.statusCode == 200 || orderResponse.statusCode == 201) {
+        final orderId = json.decode(orderResponse.body)['id']; // Get the order ID
+
+        // Send the order items to the backend
+        for (var item in orderItems) {
+          item.orderId = orderId; // Set the order ID for each item
+          final itemResponse = await http.post(
+            Uri.parse('http://10.0.2.2:8080/api/v1/orderitem/new'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode(item.toJson()), // Sending the order item JSON
+          );
+
+          if (itemResponse.statusCode == 200 || itemResponse.statusCode == 201) {
+            print('Order item successfully sent to API. Response: ${itemResponse.body}');
+          } else {
+            print('Failed to send order item. Status code: ${itemResponse.statusCode}');
+            print('Response body: ${itemResponse.body}'); // Log the response body for debugging
+          }
+        }
+
+        // Navigate to the SalesDrawerList
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SalesDrawerList(
+              initialPage: DrawerSections.history,
+              userAll: userAll,
+            ),
+          ),
+        );
+      } else {
+        print('Failed to submit order. Status code: ${orderResponse.statusCode}');
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit order. Please try again.')),
+        );
+      }
+    } catch (error) {
+      print('Error submitting order: $error');
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred. Please try again.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,16 +162,9 @@ class CheckoutPage extends StatelessWidget {
                               child: Text('No'),
                             ),
                             TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 Navigator.of(context).pop(); // Close the dialog
-                                // Navigate to AdminDrawerList with the required parameters
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => SalesDrawerList(
-                                    initialPage: DrawerSections.history,
-                                    userAll: userAll, // Pass the userAll reference
-                                  )),
-                                );
+                                await submitOrder(context); // Submit the order
                               },
                               child: Text('Yes'),
                             ),
