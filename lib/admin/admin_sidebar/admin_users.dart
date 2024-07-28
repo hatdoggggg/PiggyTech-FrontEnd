@@ -23,10 +23,11 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   @override
   void initState() {
     super.initState();
-    user_all = fetchData();
-    _searchController.addListener(_onSearchChanged);
+    user_all = fetchData(); // Fetch the initial user data
+    _searchController.addListener(_onSearchChanged); // Add a listener for search input changes
   }
 
+  // Fetch user data from the backend, optionally with a search query
   Future<List<User_all>> fetchData([String query = '']) async {
     final response = await http.get(
         Uri.parse('http://10.0.2.2:8080/api/v1/auth/all?search=$query')
@@ -39,6 +40,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     }
   }
 
+  // Update the user data based on the search input
   void _onSearchChanged() {
     setState(() {
       user_all = fetchData(_searchController.text);
@@ -52,9 +54,9 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildSearchBarWithFunnel(),
+            _buildSearchBarWithFunnel(), // Build the search bar
             SizedBox(height: 10.0),
-            _buildUserTable(),
+            _buildUserTable(), // Build the user table
           ],
         ),
       ),
@@ -66,6 +68,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
+  // Build the search bar with a funnel icon
   Widget _buildSearchBarWithFunnel() {
     return Row(
       children: [
@@ -90,12 +93,14 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
+  // Build the user table
   Widget _buildUserTable() {
     return Expanded(
       child: FutureBuilder<List<User_all>>(
         future: user_all,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show a loading spinner while the data is being fetched
             return Center(
               child: SpinKitRing(
                 color: Colors.black,
@@ -104,12 +109,22 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             );
           }
           if (snapshot.hasError) {
+            // Show an error message if there was an error fetching the data
             return Center(
               child: Text('Error: ${snapshot.error}'),
             );
           }
           if (snapshot.hasData) {
             final users = snapshot.data!;
+
+            if (users.isEmpty) {
+              // Show "No data found" message if the user list is empty
+              return Center(
+                child: Text('No data found'),
+              );
+            }
+
+            // Build the list of users
             return ListView.builder(
               itemCount: users.length,
               itemBuilder: (context, index) {
@@ -128,7 +143,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                         Row(
                           children: [
                             Text(
-                              user.username ?? 'Unknown',
+                              capitalizeFirstLetter(user.username ?? 'Unknown'),
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 20.0,
@@ -163,6 +178,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                       ],
                     ),
                     onTap: () {
+                      // Navigate to the SelectedUsers page when a user is tapped
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -175,6 +191,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
               },
             );
           }
+          // Show "Unable to load data" message if no data is available
           return Center(
             child: Text('Unable to load data'),
           );
@@ -183,6 +200,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     );
   }
 
+  // Navigate to the Add Admin page
   void _addNewAdmin() {
     Navigator.push(
       context,
@@ -196,5 +214,10 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 }

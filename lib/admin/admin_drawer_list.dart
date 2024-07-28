@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '/services/user_all.dart';
 import 'admin_sidebar/admin_dashboard.dart';
 import 'admin_sidebar/admin_product.dart';
 import 'admin_sidebar/admin_inventory.dart';
 import 'admin_sidebar/admin_sales.dart';
-import 'admin_sidebar/admin_reports.dart';
 import 'admin_sidebar/admin_users.dart';
 import 'admin_sidebar/admin_profile.dart';
 import 'admin_drawer_header.dart';
@@ -15,7 +15,6 @@ enum DrawerSections {
   product,
   inventory,
   sales,
-  reports,
   users,
   profile,
   logout,
@@ -39,7 +38,6 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
     DrawerSections.product: "Product",
     DrawerSections.inventory: "Inventory",
     DrawerSections.sales: "Sales",
-    DrawerSections.reports: "Reports",
     DrawerSections.users: "Users",
     DrawerSections.profile: "Profile",
     DrawerSections.logout: "Logout",
@@ -65,10 +63,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
         container = AdminInventoryPage(userAll: widget.userAll);
         break;
       case DrawerSections.sales:
-        container = AdminSalesPage();
-        break;
-      case DrawerSections.reports:
-        container = AdminReportsPage();
+        container = AdminSalesPage(userAll: widget.userAll);
         break;
       case DrawerSections.users:
         container = AdminUsersPage(userAll: widget.userAll);
@@ -99,7 +94,7 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
             children: [
               AdminDrawerHeader(userAll: widget.userAll),
               _buildDrawerList(),
-              SizedBox(height: 105),
+              SizedBox(height: 160),
               _buildFooter(),
             ],
           ),
@@ -119,7 +114,6 @@ class _AdminDrawerListState extends State<AdminDrawerList> {
           _buildMenuItem(DrawerSections.inventory, "Inventory", Icons.inventory_outlined),
           _buildMenuDivider(),
           _buildMenuItem(DrawerSections.sales, "Sales", Icons.monetization_on_outlined),
-          _buildMenuItem(DrawerSections.reports, "Reports", Icons.report_outlined),
           _buildMenuDivider(),
           _buildMenuItem(DrawerSections.users, "Users", Icons.people_alt_outlined),
           _buildMenuItem(DrawerSections.profile, "Profile", Icons.perm_identity_outlined),

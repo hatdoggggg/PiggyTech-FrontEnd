@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart'; // Import for DateFormat
+import 'package:intl/intl.dart';
 
-import '../../services/inventory.dart';
 import 'admin_inventory/add_inventory.dart';
 import 'admin_inventory/selectedInventory.dart';
-import '../../services/user_all.dart';
+import '/services/inventory.dart';
+import '/services/user_all.dart';
 
-
+// The main widget for the admin inventory page
 class AdminInventoryPage extends StatefulWidget {
   final User_all userAll;
 
@@ -24,12 +24,24 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
   TextEditingController _searchController = TextEditingController();
   late Future<List<Inventory>> inventories;
 
-  Future<List<Inventory>> fetchData() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/inventory/all'));
+  // Fetch inventory data from the backend, optionally with a search query
+  Future<List<Inventory>> fetchData([String query = '']) async {
+    // Construct the URL with the search query if provided
+    String url = 'http://10.0.2.2:8080/api/v1/inventory/all';
+    if (query.isNotEmpty) {
+      url += '?search=$query'; // Append the search parameter
+    }
+
+    // Perform the HTTP GET request
+    final response = await http.get(Uri.parse(url));
+
+    // Check if the response is successful
     if (response.statusCode == 200) {
+      // Parse the JSON response into a list of Inventory objects
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Inventory.fromJson(json)).toList();
+      return data.map((item) => Inventory.fromJson(item)).toList();
     } else {
+      // Throw an exception if the response is not successful
       throw Exception('Failed to load inventory');
     }
   }
@@ -37,7 +49,15 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
   @override
   void initState() {
     super.initState();
-    inventories = fetchData();
+    inventories = fetchData(); // Fetch the initial inventory data
+    _searchController.addListener(_onSearchChanged); // Add a listener for search input changes
+  }
+
+  // Update the inventory data based on the search input
+  void _onSearchChanged() {
+    setState(() {
+      inventories = fetchData(_searchController.text);
+    });
   }
 
   @override
@@ -47,9 +67,9 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildSearchBarWithFunnel(),
+            _buildSearchBarWithFunnel(), // Build the search bar
             SizedBox(height: 20.0),
-            _buildProductTable(), // Add this line to show the product table
+            _buildProductTable(), // Build the inventory table
           ],
         ),
       ),
@@ -61,6 +81,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
     );
   }
 
+  // Build the search bar with a funnel icon
   Widget _buildSearchBarWithFunnel() {
     return Row(
       children: [
@@ -85,12 +106,14 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
     );
   }
 
+  // Build the inventory table
   Widget _buildProductTable() {
     return Expanded(
       child: FutureBuilder<List<Inventory>>(
         future: inventories,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show a loading spinner while the data is being fetched
             return Center(
               child: SpinKitRing(
                 color: Colors.black,
@@ -99,6 +122,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
             );
           }
           if (snapshot.hasError) {
+            // Show an error message if there was an error fetching the data
             return Center(
               child: Text('Error: ${snapshot.error}'),
             );
@@ -106,7 +130,14 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
           if (snapshot.hasData) {
             final inventories = snapshot.data!;
 
-            // Group inventories by receivedDate
+            if (inventories.isEmpty) {
+              // Show "No data found" message if the inventory list is empty
+              return Center(
+                child: Text('No data found'),
+              );
+            }
+
+            // Group inventories by date
             final Map<DateTime, List<Inventory>> groupedInventories = {};
             for (var inventory in inventories) {
               final date = DateFormat('yyyy-MM-dd').parse(DateFormat('yyyy-MM-dd').format(inventory.receivedDate));
@@ -116,9 +147,10 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
               groupedInventories[date]!.add(inventory);
             }
 
-            // Sort dates
+            // Sort dates in descending order
             final sortedDates = groupedInventories.keys.toList()..sort((a, b) => b.compareTo(a));
 
+            // Build the list of inventories grouped by date
             return ListView.builder(
               itemCount: sortedDates.length,
               itemBuilder: (context, dateIndex) {
@@ -139,6 +171,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
                         ),
                       ),
                     ),
+                    // Build the list of inventories for each date
                     ...inventoriesForDate.map((inventory) {
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 4.0),
@@ -169,6 +202,7 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
               },
             );
           }
+          // Show "Unable to load data" message if no data is available
           return Center(
             child: Text('Unable to load data'),
           );
@@ -177,12 +211,12 @@ class _AdminInventoryPageState extends State<AdminInventoryPage> {
     );
   }
 
-
+  // Navigate to the Add Inventory page
   void _addNewInventory() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddInventory(userAll: widget.userAll), // Pass the User_all object here
+        builder: (context) => AddInventory(userAll: widget.userAll),
       ),
     );
   }

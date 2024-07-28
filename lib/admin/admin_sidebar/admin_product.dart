@@ -10,7 +10,7 @@ import 'admin_product/selectedProduct.dart';
 import '../../services/user_all.dart'; // Import the User_all class
 
 class AdminProductPage extends StatefulWidget {
-  final User_all userAll; // Add this field to receive the User_all object
+  final User_all userAll; // Field to receive the User_all object
 
   const AdminProductPage({super.key, required this.userAll});
 
@@ -23,6 +23,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
   List<Product> filteredProducts = []; // Initialize filteredProducts as a List<Product>
   late Future<List<Product>> products;
 
+  // Fetch data from the backend
   Future<List<Product>> fetchData([String query = '']) async {
     final response = await http.get(
         Uri.parse('http://10.0.2.2:8080/api/v1/product/all?search=$query') // Update this URL to match your backend search endpoint if needed
@@ -35,10 +36,10 @@ class _AdminProductPageState extends State<AdminProductPage> {
   @override
   void initState() {
     super.initState();
-    products = fetchData();
+    products = fetchData(); // Fetch initial data
     _searchController.addListener(() {
       setState(() {
-        products = fetchData(_searchController.text);
+        products = fetchData(_searchController.text); // Fetch data based on search query
       });
     });
   }
@@ -57,20 +58,21 @@ class _AdminProductPageState extends State<AdminProductPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildSearchBarWithFunnel(),
+            _buildSearchBarWithFunnel(), // Search bar with sorting funnel
             SizedBox(height: 10.0), // Space between search bar and table
-            _buildProductTable(),
+            _buildProductTable(), // Product table
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewProduct,
+        onPressed: _addNewProduct, // Add new product
         child: Icon(Icons.add),
         backgroundColor: Colors.yellow,
       ),
     );
   }
 
+  // Widget for the search bar with a sort button
   Widget _buildSearchBarWithFunnel() {
     return Row(
       children: [
@@ -107,12 +109,14 @@ class _AdminProductPageState extends State<AdminProductPage> {
     );
   }
 
+  // Widget for the product table
   Widget _buildProductTable() {
     return Expanded(
       child: FutureBuilder<List<Product>>(
-        future: products,
+        future: products, // Fetch products
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show loading spinner while waiting for data
             return Center(
               child: SpinKitRing(
                 color: Colors.black,
@@ -121,12 +125,19 @@ class _AdminProductPageState extends State<AdminProductPage> {
             );
           }
           if (snapshot.hasError) {
+            // Show error message if there's an error
             return Center(
               child: Text('Error: ${snapshot.error}'),
             );
           }
           if (snapshot.hasData) {
             filteredProducts = snapshot.data!; // Assign fetched products to filteredProducts
+            if (filteredProducts.isEmpty) {
+              // Show "No data found" message if there are no products
+              return Center(
+                child: Text('No data found'),
+              );
+            }
             return Padding(
               padding: EdgeInsets.all(3.0),
               child: ListView.builder(
@@ -158,6 +169,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
                         ],
                       ),
                       onTap: () {
+                        // Navigate to the selected product page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -169,9 +181,10 @@ class _AdminProductPageState extends State<AdminProductPage> {
                                   filteredProducts.remove(deletedProduct);
                                 });
                               },
-                              onProductUpdated: (Product updatedProduct) { // Add this line
+                              onProductUpdated: (Product updatedProduct) {
+                                // Update the product in the list
                                 setState(() {
-                                  filteredProducts[index] = updatedProduct; // Update the product in the list
+                                  filteredProducts[index] = updatedProduct;
                                 });
                               },
                             ),
@@ -184,6 +197,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
               ),
             );
           }
+          // Show "Unable to load data" message if no data is available
           return Center(
             child: Text('Unable to load data'),
           );
@@ -192,7 +206,7 @@ class _AdminProductPageState extends State<AdminProductPage> {
     );
   }
 
-
+  // Function to navigate to the AddProduct page
   void _addNewProduct() {
     Navigator.push(
       context,

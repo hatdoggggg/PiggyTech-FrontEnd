@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -67,7 +66,7 @@ class _SalesDashboardPageState extends State<SalesDashboardPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Welcome to Piggytech, ${widget.userAll.username}!",
+                  "Welcome to Piggytech, ${capitalizeFirstLetter(widget.userAll.username ?? 'Username not available')}!",
                   style: TextStyle(fontSize: 24.0),
                 ),
                 SizedBox(height: 10.0),
@@ -120,6 +119,11 @@ class _SalesDashboardPageState extends State<SalesDashboardPage> {
         ),
       ),
     );
+  }
+
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 }
 

@@ -1,11 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
+import 'package:fl_chart/fl_chart.dart';
 
 import '/services/user_all.dart';
 import '/services/product.dart';
+import '/services/order_detail.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   final User_all userAll;
@@ -19,6 +19,19 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   late Future<int> userCount;
   late Future<int> productCount;
+  late Future<double> totalSalesAmount;
+  late Future<List<SalesData>> monthlySalesData;
+  late Future<List<Product>> productData;
+
+  @override
+  void initState() {
+    super.initState();
+    userCount = fetchUserCount();
+    productCount = fetchProductCount();
+    totalSalesAmount = fetchTotalSalesAmount();
+    monthlySalesData = fetchMonthlySalesData();
+    productData = fetchProductData();
+  }
 
   Future<int> fetchUserCount() async {
     try {
@@ -65,16 +78,101 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    userCount = fetchUserCount();
-    productCount = fetchProductCount(); // Fetch the count when initializing
+  Future<double> fetchTotalSalesAmount() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/order/all'), // Android
+        // Uri.parse('http://127.0.0.1:8080/api/v1/order/all'), // Web
+        // Uri.parse('http://---.---.---.---:8080/api/v1/order/all'), // IP Address of laptop
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        double totalAmount = 0.0;
+
+        for (var orderDetail in data) {
+          OrderDetail order = OrderDetail.fromJson(orderDetail);
+          double orderTotal = order.items.fold(0, (sum, item) {
+            return sum + (item.quantity * item.price);
+          });
+          totalAmount += orderTotal;
+        }
+        return totalAmount; // Return the total sales amount
+      } else {
+        throw Exception('Failed to load orders');
+      }
+    } catch (e) {
+      print('Error fetching total sales amount: $e');
+      return 0.0; // Return a default value in case of error
+    }
+  }
+
+  Future<List<SalesData>> fetchMonthlySalesData() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/order/all'), // Android
+        // Uri.parse('http://127.0.0.1:8080/api/v1/order/all'), // Web
+        // Uri.parse('http://---.---.---.---:8080/api/v1/order/all'), // IP Address of laptop
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        Map<int, double> salesByMonth = {};
+
+        for (var orderDetail in data) {
+          OrderDetail order = OrderDetail.fromJson(orderDetail);
+          double orderTotal = order.totalAmount;
+          int month = order.orderDate.month;
+
+          if (!salesByMonth.containsKey(month)) {
+            salesByMonth[month] = 0.0;
+          }
+          salesByMonth[month] = salesByMonth[month]! + orderTotal;
+        }
+
+        List<SalesData> salesData = [];
+        salesByMonth.forEach((month, totalSales) {
+          salesData.add(SalesData(month, totalSales));
+        });
+
+        return salesData;
+      } else {
+        throw Exception('Failed to load orders');
+      }
+    } catch (e) {
+      print('Error fetching monthly sales data: $e');
+      return []; // Return an empty list in case of error
+    }
+  }
+
+  Future<List<Product>> fetchProductData() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8080/api/v1/product/all'), // Android
+        // Uri.parse('http://127.0.0.1:8080/api/v1/product/all'), // Web
+        // Uri.parse('http://---.---.---.---:8080/api/v1/product/all'), // IP Address of laptop
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List<Product> products = [];
+        for (var product in data) {
+          products.add(Product.fromJson(product));
+        }
+        return products; // Return the list of products
+      } else {
+        throw Exception('Failed to load products');
+      }
+    } catch (e) {
+      print('Error fetching product data: $e');
+      return []; // Return an empty list in case of error
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.0),
         child: Column(
@@ -83,7 +181,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
             Padding(
               padding: EdgeInsets.only(bottom: 10.0),
               child: Text(
-                "Welcome to Piggytech, Admin ${widget.userAll.username}!",
+                "Welcome to Piggytech, Admin ${capitalizeFirstLetter(widget.userAll.username ?? '')}!",
                 style: TextStyle(fontSize: 20.0),
                 textAlign: TextAlign.center,
               ),
@@ -115,13 +213,68 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     }
                   },
                 ),
-                _buildSummaryBox("Total Sales", "0"),
+                FutureBuilder<double>(
+                  future: totalSalesAmount,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return _buildSummaryBox("Total Sales", "Loading...");
+                    } else if (snapshot.hasError) {
+                      return _buildSummaryBox("Total Sales", "Error");
+                    } else {
+                      return _buildSummaryBox("Total Sales", '₱${snapshot.data?.toStringAsFixed(2) ?? "0.00"}');
+                    }
+                  },
+                ),
               ],
             ),
             SizedBox(height: 20.0),
-            _buildBarChart(),
+            Column(
+              children: [
+                Text(
+                  "Monthly Sales",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10.0),
+                FutureBuilder<List<SalesData>>(
+                  future: monthlySalesData,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData) {
+                      return _buildSalesChart(snapshot.data!);
+                    } else {
+                      return Text('No data available');
+                    }
+                  },
+                ),
+              ],
+            ),
             SizedBox(height: 20.0),
-            _buildPieChartWithLabels(),
+            Column(
+              children: [
+                Text(
+                  "Sold by Product",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10.0),
+                FutureBuilder<List<Product>>(
+                  future: productData,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData) {
+                      return _buildPieChartWithLabels(snapshot.data!);
+                    } else {
+                      return Text('No data available');
+                    }
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -155,99 +308,101 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
-  Widget _buildBarChart() {
-    return Container(
+  Widget _buildSalesChart(List<SalesData> data) {
+    List<BarChartGroupData> barGroups = data.map((salesData) {
+      return BarChartGroupData(
+        x: salesData.month,
+        barRods: [
+          BarChartRodData(
+            toY: salesData.totalSales,
+            color: Colors.blue,
+            width: 10,
+          ),
+        ],
+      );
+    }).toList();
+
+    return SizedBox(
       height: 200,
-      padding: EdgeInsets.all(10),
       child: BarChart(
         BarChartData(
-          barGroups: [
-            BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 10000, color: Colors.blue)]),
-            BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 15000, color: Colors.blue)]),
-            BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 20000, color: Colors.blue)]),
-            BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 25000, color: Colors.blue)]),
-          ],
+          alignment: BarChartAlignment.spaceAround,
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: Colors.black, width: 0.5),
+          ),
           titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 50),
+            ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  const style = TextStyle(color: Colors.black, fontSize: 10);
-                  switch (value.toInt()) {
-                    case 1:
-                      return Text('Feb', style: style);
-                    case 2:
-                      return Text('Mar', style: style);
-                    case 3:
-                      return Text('Apr', style: style);
-                    case 4:
-                      return Text('May', style: style);
-                    default:
-                      return Container();
-                  }
+                getTitlesWidget: (double value, TitleMeta meta) {
+                  return Text(_getMonthName(value.toInt()));
                 },
               ),
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 28),
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false), // Right titles removed
             ),
           ),
+          barGroups: barGroups,
         ),
       ),
     );
   }
 
-  Widget _buildPieChartWithLabels() {
-    return Container(
-      height: 250,
-      child: Stack(
-        children: [
-          Center(
-            child: PieChart(
-              PieChartData(
-                sections: [
-                  PieChartSectionData(value: 25, color: Colors.pink, title: ''),
-                  PieChartSectionData(value: 25, color: Colors.lightBlue, title: ''),
-                  PieChartSectionData(value: 50, color: Colors.yellowAccent, title: ''),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 30,
-            right: 50,
-            child: Row(
-              children: [
-                Icon(Icons.arrow_right, color: Colors.black),
-                SizedBox(width: 4),
-                Text('Starter 25%', style: TextStyle(color: Colors.black)),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: 30,
-            right: 50,
-            child: Row(
-              children: [
-                Icon(Icons.arrow_right, color: Colors.black),
-                SizedBox(width: 4),
-                Text('Grower 25%', style: TextStyle(color: Colors.black)),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 140,
-            left: 20,
-            child: Row(
-              children: [
-                Icon(Icons.arrow_left, color: Colors.black),
-                SizedBox(width: 4),
-                Text('Booster 50%', style: TextStyle(color: Colors.black)),
-              ],
-            ),
-          ),
-        ],
+  Widget _buildPieChartWithLabels(List<Product> products) {
+    List<PieChartSectionData> sections = products.map((product) {
+      return PieChartSectionData(
+        value: product.sold.toDouble(),
+        title: '${product.productName}: ${product.sold}',
+        color: Colors.primaries[products.indexOf(product) % Colors.primaries.length],
+        radius: 100,
+      );
+    }).toList();
+
+    return SizedBox(
+      height: 300,
+      child: PieChart(
+        PieChartData(
+          sections: sections,
+          sectionsSpace: 2,
+          centerSpaceRadius: 40,
+          borderData: FlBorderData(show: false),
+        ),
       ),
     );
   }
+
+  String capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
+  }
+
+  String _getMonthName(int month) {
+    List<String> monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return monthNames[month - 1];
+  }
+}
+
+class SalesData {
+  final int month;
+  final double totalSales;
+
+  SalesData(this.month, this.totalSales);
 }

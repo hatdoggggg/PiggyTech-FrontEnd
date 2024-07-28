@@ -43,7 +43,7 @@ class _SalesDrawerHeaderState extends State<SalesDrawerHeader> {
                   ),
                 ),
                 Text(
-                  widget.userAll.username ?? 'Username not available', // Handle null username
+                  capitalizeFirstLetter(widget.userAll.username ?? 'Username not available'), // Capitalize first letter
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -71,5 +71,10 @@ class _SalesDrawerHeaderState extends State<SalesDrawerHeader> {
     } else {
       return 'assets/images/profile.jpg'; // Default image
     }
+  }
+
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 }
