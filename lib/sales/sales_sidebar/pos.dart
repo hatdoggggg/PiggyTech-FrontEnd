@@ -98,7 +98,7 @@ class _PosPageState extends State<PosPage> {
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 2,
+                    childAspectRatio: 1.5,
                   ),
                   itemCount: _products.length,
                   itemBuilder: (context, index) {

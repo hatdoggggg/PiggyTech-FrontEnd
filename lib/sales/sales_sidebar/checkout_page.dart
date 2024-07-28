@@ -65,7 +65,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-  Future<void> processOrder(BuildContext context) async {
+  Future<void> processOrder() async {
     double totalPrice = 0.0;
     List<OrderItem> orderItems = [];
 
@@ -96,36 +96,36 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     final orderId = await submitOrder(order);
 
-    if (orderId != null) {
-      bool allItemsSubmitted = true;
+    if (mounted) {
+      if (orderId != null) {
+        bool allItemsSubmitted = true;
 
-      for (var item in orderItems) {
-        item.orderId = orderId; // Set the order ID for each item
-        if (!await submitOrderItem(item)) {
-          allItemsSubmitted = false;
-          break;
+        for (var item in orderItems) {
+          item.orderId = orderId; // Set the order ID for each item
+          if (!await submitOrderItem(item)) {
+            allItemsSubmitted = false;
+            break;
+          }
         }
-      }
 
-      if (mounted) {
-        if (allItemsSubmitted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SalesDrawerList(
-                initialPage: DrawerSections.history,
-                userAll: widget.userAll,
+        if (mounted) {
+          if (allItemsSubmitted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SalesDrawerList(
+                  initialPage: DrawerSections.history,
+                  userAll: widget.userAll,
+                ),
               ),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to submit all order items. Please try again.')),
-          );
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to submit all order items. Please try again.')),
+            );
+          }
         }
-      }
-    } else {
-      if (mounted) {
+      } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to submit order. Please try again.')),
         );
@@ -198,7 +198,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             TextButton(
                               onPressed: () async {
                                 Navigator.of(context).pop(); // Close the dialog
-                                await processOrder(context); // Submit the order
+                                await processOrder(); // Submit the order
                               },
                               child: Text('Yes'),
                             ),
