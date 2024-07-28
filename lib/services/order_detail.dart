@@ -1,17 +1,30 @@
+import 'order_detail_more.dart';
+
 class OrderDetail {
   final int id;
-  final String productName;
-  final int quantity;
-  final double price;
+  final DateTime orderDate;
+  final String username;
+  final double totalAmount;
+  final List<OrderDetailMore> items;
 
-  OrderDetail({required this.id, required this.productName, required this.quantity, required this.price});
+  OrderDetail({
+    required this.id,
+    required this.orderDate,
+    required this.username,
+    required this.totalAmount,
+    required this.items,
+  });
 
   factory OrderDetail.fromJson(Map<String, dynamic> json) {
+    var itemList = json['products'] as List; // Assuming API returns 'products'
+    List<OrderDetailMore> orderItems = itemList.map((item) => OrderDetailMore.fromJson(item)).toList();
+
     return OrderDetail(
       id: json['id'],
-      productName: json['productName'],
-      quantity: json['quantity'],
-      price: json['price'],
+      orderDate: DateTime.parse(json['orderDate']),
+      username: json['username'],
+      totalAmount: json['totalAmount'],
+      items: orderItems,
     );
   }
 }

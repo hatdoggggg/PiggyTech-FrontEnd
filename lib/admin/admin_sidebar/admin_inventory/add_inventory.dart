@@ -7,6 +7,7 @@ import '/../services/product.dart';
 import '/services/user_all.dart';
 import '/admin/admin_drawer_list.dart';
 
+// The main widget for adding inventory
 class AddInventory extends StatefulWidget {
   final User_all userAll;
 
@@ -31,6 +32,7 @@ class _AddInventoryState extends State<AddInventory> {
   @override
   void initState() {
     super.initState();
+    // Fetch the list of products when the widget is initialized
     fetchProducts().then((productList) {
       setState(() {
         products = productList;
@@ -38,6 +40,7 @@ class _AddInventoryState extends State<AddInventory> {
     });
   }
 
+  // Fetch product data from the backend, optionally with a search query
   Future<List<Product>> fetchProducts([String query = '']) async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/api/v1/product/all?search=$query'));
     if (response.statusCode == 200) {
@@ -49,6 +52,7 @@ class _AddInventoryState extends State<AddInventory> {
     }
   }
 
+  // Create a new inventory entry
   Future<bool> createInventory(Inventory inventory) async {
     final response = await http.post(
       Uri.parse('http://10.0.2.2:8080/api/v1/inventory/new'),
@@ -70,6 +74,7 @@ class _AddInventoryState extends State<AddInventory> {
     }
   }
 
+  // Show a dialog indicating success
   void showSuccessDialog() {
     showDialog(
       context: context,
@@ -99,6 +104,7 @@ class _AddInventoryState extends State<AddInventory> {
     );
   }
 
+  // Show a dialog indicating an error
   void showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -119,6 +125,7 @@ class _AddInventoryState extends State<AddInventory> {
     );
   }
 
+  // Select a date using a date picker
   Future<void> selectDate(BuildContext context, {required bool isReceivedDate}) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -130,9 +137,11 @@ class _AddInventoryState extends State<AddInventory> {
       setState(() {
         if (isReceivedDate) {
           receivedDate = picked;
+          // Update the received date text field
           receivedDateController.text = receivedDate!.toLocal().toString().split(' ')[0];
         } else {
           expirationDate = picked;
+          // Update the expiration date text field
           expirationDateController.text = expirationDate!.toLocal().toString().split(' ')[0];
         }
       });
@@ -166,6 +175,7 @@ class _AddInventoryState extends State<AddInventory> {
                 ),
               ),
               SizedBox(height: 20),
+              // Dropdown for selecting a product
               DropdownButtonFormField<Product>(
                 decoration: InputDecoration(
                   labelText: 'Product Name',
@@ -177,7 +187,10 @@ class _AddInventoryState extends State<AddInventory> {
                   fillColor: Theme.of(context).primaryColor.withOpacity(0.1),
                   filled: true,
                 ),
-                items: products.map((Product product) {
+                // Show a 'No product found' message if the products list is empty
+                items: products.isEmpty
+                    ? [DropdownMenuItem(child: Text('No product found'), value: null)]
+                    : products.map((Product product) {
                   return DropdownMenuItem<Product>(
                     value: product,
                     child: Text(product.productName),
@@ -197,6 +210,7 @@ class _AddInventoryState extends State<AddInventory> {
                 },
               ),
               SizedBox(height: 20),
+              // Text field for entering quantity
               TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -220,6 +234,7 @@ class _AddInventoryState extends State<AddInventory> {
                 },
               ),
               SizedBox(height: 20),
+              // Text field for selecting received date
               TextFormField(
                 controller: receivedDateController,
                 decoration: InputDecoration(
@@ -242,6 +257,7 @@ class _AddInventoryState extends State<AddInventory> {
                 },
               ),
               SizedBox(height: 20),
+              // Text field for selecting expiration date
               TextFormField(
                 controller: expirationDateController,
                 decoration: InputDecoration(
@@ -266,6 +282,7 @@ class _AddInventoryState extends State<AddInventory> {
                 },
               ),
               SizedBox(height: 20),
+              // Button to submit the form
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.yellow,

@@ -91,7 +91,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       id: 0,
       totalAmount: totalPrice,
       orderDate: DateTime.now(),
-      email: widget.userAll.email ?? 'unknown@example.com',
+      username: widget.userAll.username ?? 'unknown',
     );
 
     final orderId = await submitOrder(order);

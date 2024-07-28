@@ -43,7 +43,7 @@ class _AdminDrawerHeaderState extends State<AdminDrawerHeader> {
                   ),
                 ),
                 Text(
-                  widget.userAll.username ?? 'Guest', // Provide a default value
+                  capitalizeFirstLetter(widget.userAll.username ?? 'Guest'), // Capitalize first letter
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -71,5 +71,10 @@ class _AdminDrawerHeaderState extends State<AdminDrawerHeader> {
     } else {
       return 'assets/images/profile.jpg'; // Default image
     }
+  }
+
+  String capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 }

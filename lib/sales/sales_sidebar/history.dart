@@ -1,10 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:intl/intl.dart';
 
 import '/services/user_all.dart';
-import '/services/order_detail.dart'; // Ensure this has 'List<OrderDetail> items;'
-import '/services/order_detail2.dart'; // Assuming this is not used anymore
+import '/services/order_detail.dart';
 
 class HistoryPage extends StatefulWidget {
   final User_all userAll;
@@ -16,8 +16,9 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
-  List<OrderDetail2> orders = []; // List to hold orders
+  List<OrderDetail> orders = []; // List to hold orders
   bool isLoading = true; // Loading state
+  Map<String, List<OrderDetail>> ordersByDate = {}; // Grouped orders by date
 
   @override
   void initState() {
@@ -32,19 +33,21 @@ class _HistoryPageState extends State<HistoryPage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> orderData = json.decode(response.body);
-        List<OrderDetail2> fetchedOrders = [];
+        List<OrderDetail> fetchedOrders = [];
 
         for (var orderJson in orderData) {
-          OrderDetail2 order = OrderDetail2.fromJson(orderJson);
-          // Fetch order items for each order
-          List<OrderDetail> orderItems = await fetchOrderItems(order.id);
-          order.items = orderItems; // Add the items to the order
-          fetchedOrders.add(order);
+          OrderDetail order = OrderDetail.fromJson(orderJson);
+
+          // Filter orders based on the logged-in user's username
+          if (order.username == widget.userAll.username) {
+            fetchedOrders.add(order);
+          }
         }
 
         setState(() {
           orders = fetchedOrders;
           isLoading = false;
+          groupOrdersByDate(); // Group orders by date
         });
       } else {
         print('Failed to load orders. Status code: ${response.statusCode}');
@@ -57,21 +60,21 @@ class _HistoryPageState extends State<HistoryPage> {
     }
   }
 
-  Future<List<OrderDetail>> fetchOrderItems(int orderId) async {
-    try {
-      final response = await http.get(
-          Uri.parse('http://10.0.2.2:8080/api/v1/orderitem/all/$orderId'));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> itemData = json.decode(response.body);
-        return itemData.map((itemJson) => OrderDetail.fromJson(itemJson)).toList();
-      } else {
-        print('Failed to load order items. Status code: ${response.statusCode}');
+  void groupOrdersByDate() {
+    ordersByDate.clear();
+    for (var order in orders) {
+      // Convert the order date to local time zone
+      DateTime localOrderDate = order.orderDate.toLocal();
+      String formattedDate = DateFormat('MM/dd/yyyy').format(localOrderDate);
+      if (!ordersByDate.containsKey(formattedDate)) {
+        ordersByDate[formattedDate] = [];
       }
-    } catch (error) {
-      print('Error fetching order items: $error');
+      ordersByDate[formattedDate]!.add(order);
     }
-    return [];
+    // Sort orders by ID in descending order within each date group
+    ordersByDate.forEach((date, orderList) {
+      orderList.sort((a, b) => b.id.compareTo(a.id));
+    });
   }
 
   @override
@@ -82,10 +85,18 @@ class _HistoryPageState extends State<HistoryPage> {
       );
     }
 
+    // If there are no orders, display a message
+    if (orders.isEmpty) {
+      return Scaffold(
+        body: Center(child: Text('No data found')), // Show no data message
+      );
+    }
+
     return ListView.builder(
-      itemCount: orders.length,
+      itemCount: ordersByDate.length,
       itemBuilder: (context, index) {
-        final order = orders[index];
+        String date = ordersByDate.keys.elementAt(index);
+        List<OrderDetail> ordersForDate = ordersByDate[date]!;
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
@@ -95,24 +106,65 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
           child: ExpansionTile(
             title: Text(
-              '${order.orderDate.month}/${order.orderDate.day}/${order.orderDate.year}',
+              date,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            children: [
-              Padding(
+            children: ordersForDate.map((order) {
+              // Convert the order date to local time zone
+              DateTime localOrderDate = order.orderDate.toLocal();
+
+              // Calculate the total amount for the order
+              double totalAmount = order.items.fold(0, (sum, item) {
+                return sum + (item.quantity * item.price);
+              });
+
+              // Format the order date in 12-hour format with AM/PM
+              String formattedOrderDate = DateFormat('MM/dd/yyyy hh:mm a').format(localOrderDate);
+
+              return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Order #${order.id}'),
-                    Text('Placed on ${order.orderDate}'),
-                    Text('Email: ${order.email}'),
+                    Row(
+                      children: [
+                        Text(
+                          'Order #',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text('${order.id}'),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'Order Date: ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(formattedOrderDate), // Use the formatted order date here
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'Cashier: ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text('${order.username}'),
+                      ],
+                    ),
                     const SizedBox(height: 8.0),
                     const Text('Order Details:',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     Table(
                       columnWidths: const {
-                        0: FlexColumnWidth(3),
+                        0: FlexColumnWidth(2),
                         1: FlexColumnWidth(1),
                         2: FlexColumnWidth(1),
                         3: FlexColumnWidth(1),
@@ -133,7 +185,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         ...order.items.map((item) {
                           return TableRow(
                             children: [
-                              Text(item.productName),
+                              Text(item.product),
                               Text('${item.quantity}'),
                               Text('₱${item.price.toStringAsFixed(2)}'),
                               Text('₱${(item.quantity * item.price).toStringAsFixed(2)}'), // Calculate total
@@ -142,11 +194,23 @@ class _HistoryPageState extends State<HistoryPage> {
                         }).toList(),
                       ],
                     ),
+                    const SizedBox(height: 8.0),
+                    // Display the total amount for the order
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Total Amount: ₱${totalAmount.toStringAsFixed(2)}',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Divider(thickness: 5),
                     const SizedBox(height: 16.0),
                   ],
                 ),
-              ),
-            ],
+              );
+            }).toList(),
           ),
         );
       },
